@@ -47,7 +47,7 @@ double getCurrentValue(){
     return percent * 100;
 }
 
-void runCoveragePercentageSize(uintmax_t iterationsPerSize, uintmax_t size){
+void runCoveragePercentageSize(uintmax_t iterationsPerSize, uint16_t size){
 double_t coveragePercentage = 0;
     std::chrono::microseconds duration{};
 
@@ -123,17 +123,17 @@ double_t coveragePercentage = 0;
 
 void runCoveragePercentage(uintmax_t iterationsPerSize){
 
-    for(uintmax_t size = 4; size < 100; size++){
+    for(uint16_t size = 4; size < 100; size++){
         runCoveragePercentageSize(iterationsPerSize, size);
     }
-    for(uintmax_t size = 100; size < 1001; size = size + 50){
+    for(uint16_t size = 100; size < 1001; size = size + 50){
         runCoveragePercentageSize(iterationsPerSize, size);
     }
 }
 
 void runDFSBenchmark(uintmax_t iterationsPerSize){
     
-    for(uintmax_t size = 4; size < 101; size++){
+    for(uint16_t size = 4; size < 101; size++){
         std::chrono::microseconds duration{};
 
         SIZE_T virtualMemory{};
@@ -199,7 +199,7 @@ void runDFSBenchmark(uintmax_t iterationsPerSize){
 }
 
 
-void getStandardDeviationDuration(uintmax_t iterationsPerSize, uintmax_t size = 1000){ 
+void getStandardDeviationDuration(uintmax_t iterationsPerSize, uint16_t size = 1000){ 
     
         std::chrono::microseconds duration{};
 

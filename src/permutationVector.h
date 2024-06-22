@@ -40,7 +40,7 @@ public:
     /// @brief Constructor for permutationVector, 
     /// @param base the space available in the cell, MUST BE >0. ( [cols or rows] - nonoInput[x].sum())  
     /// @param digits the amount of white space runs inbetween black space runs, (nonoInput[x].size()-1)
-    permutationVector(uintmax_t base, uintmax_t digits) : base(base), digits(digits), number(digits, 1), currentSum(digits), allPermutationsIterated(false)  {}
+    permutationVector(uint16_t base, uint16_t digits) : base(base), digits(digits), number(digits, 1), currentSum(digits), allPermutationsIterated(false)  {}
 
     /// @brief Overload prefix ++ operator to do nextPermutation
     permutationVector& operator++() {
@@ -65,10 +65,10 @@ public:
 
     /// @brief currentSum accessor
     /// @return summation of number vector
-    uintmax_t getSum() const { return currentSum;}
+    uint16_t getSum() const { return currentSum;}
 
     /// @brief number vector accesor to avoid copying it
-    const std::vector<uintmax_t>& getNumber() const {
+    const std::vector<uint16_t>& getNumber() const {
         return number;
     }
 
@@ -76,16 +76,16 @@ public:
 
 private:
 
-    uintmax_t base;
-    uintmax_t digits;
-    uintmax_t currentSum;
+    uint16_t base;
+    uint16_t digits;
+    uint16_t currentSum;
     
-    std::vector<uintmax_t> number;
+    std::vector<uint16_t> number;
 
     /// @brief sum all elements in the number vector and assign answer to currentSum
     void sum() {
-        uintmax_t sum{};
-        for(uintmax_t i =0; i < this->digits; i++){
+        uint16_t sum{};
+        for(uint16_t i =0; i < this->digits; i++){
             sum += this->number[i];
         }
         this->currentSum = sum;

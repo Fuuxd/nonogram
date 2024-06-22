@@ -6,16 +6,16 @@
 class nonogram
 {
 public: // small performance boost by struct-like behaviour of all public class.
-    uintmax_t rows;
-    uintmax_t cols;
+    uint16_t rows;
+    uint16_t cols;
 
     std::vector<std::vector<bool>> nonoSolved;
     //nonoworking will hold three states per cell: not marked, marked, certainly not marked (grey space / X)
     std::vector<std::vector<bool>> nonoWorking; //working on solution here holds two bools per cell
     std::vector<std::vector<bool>> nonoWorkingDFS; //working on solution FOR DFS here holds two bools per cell
-    std::vector<std::vector<uintmax_t>> nonoInput; // first rows vectors are the rows input top to bottom and next cols vectors are the cols input left to right.
-    std::vector<uintmax_t> nonoInputMax;
-    std::vector<uintmax_t> nonoInputSum;
+    std::vector<std::vector<uint16_t>> nonoInput; // first rows vectors are the rows input top to bottom and next cols vectors are the cols input left to right.
+    std::vector<uint16_t> nonoInputMax;
+    std::vector<uint16_t> nonoInputSum;
     
 
     //for display 
@@ -23,12 +23,12 @@ public: // small performance boost by struct-like behaviour of all public class.
     size_t maxHor =0; // maximum number of digits horizontally
     size_t maxVer =0; // maximum number of digits vertically
 
-    nonogram(uintmax_t rowsIn, uintmax_t colsIn);
+    nonogram(uint16_t rowsIn, uint16_t colsIn);
     ~nonogram();
 
-    bool isRowComplete(std::vector<std::vector<bool>> *matrix, uintmax_t passedIndex);
-    bool isColComplete(std::vector<std::vector<bool>> *matrix, uintmax_t passedIndex);
-    bool isColPossible(std::vector<std::vector<bool>> *matrix, uintmax_t passedIndex);
+    bool isRowComplete(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex);
+    bool isColComplete(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex);
+    bool isColPossible(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex);
     bool isAllColsPossible(std::vector<std::vector<bool>> *matrix);
 
     double_t currentProgress();
@@ -49,11 +49,11 @@ public: // small performance boost by struct-like behaviour of all public class.
     void logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot);
 
 
-    bool isPermutationPossible(permutationVector* rowSpace, uintmax_t leftmostSpace, uintmax_t rowIndex);
-    bool isPermutationPossible(uintmax_t blackRun, uintmax_t leftmostSpace, uintmax_t rowIndex);
+    bool isPermutationPossible(permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex);
+    bool isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
     bool isColsSolutionDFS();
 
-    void DFS(uintmax_t index, bool *solutionFound);
+    void DFS(uint16_t index, bool *solutionFound);
     bool solveDFS();
 
 };

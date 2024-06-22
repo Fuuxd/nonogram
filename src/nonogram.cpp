@@ -3,7 +3,7 @@
 /// @brief Create a random nonogram with a set # of rows and cols
 /// @param rowsIn Number of Rows. must be an unsigned integer <= 65,535
 /// @param colsIn Number of Columns. must be an unsigned integer <= 65,535
-nonogram::nonogram(uintmax_t rowsIn, uintmax_t colsIn)
+nonogram::nonogram(uint16_t rowsIn, uint16_t colsIn)
 {
     rows = rowsIn;
     cols = colsIn;
@@ -25,8 +25,8 @@ nonogram::nonogram(uintmax_t rowsIn, uintmax_t colsIn)
     unsigned int bitcount = 0;
     std::vector<std::vector<bool>> matrix(rows, std::vector<bool>(cols, false));
 
-    for (uintmax_t i = 0; i < rows; ++i) {
-        for (uintmax_t j = 0; j < cols; ++j) {
+    for (uint16_t i = 0; i < rows; ++i) {
+        for (uint16_t j = 0; j < cols; ++j) {
             if(!bitcount){ 
                 data = rng();
                 bitcount = 64;
@@ -44,13 +44,13 @@ nonogram::nonogram(uintmax_t rowsIn, uintmax_t colsIn)
     //
 
     //create first rows inputs, top to bottom
-    for(uintmax_t i = 0; i < rows; i++){
-        uintmax_t inputMax{};
-        uintmax_t inputSum{};
-        std::vector<uintmax_t> toBePushed;
-        uintmax_t counter  = 0;
+    for(uint16_t i = 0; i < rows; i++){
+        uint16_t inputMax{};
+        uint16_t inputSum{};
+        std::vector<uint16_t> toBePushed;
+        uint16_t counter  = 0;
         bool concurring = 0;
-        for(uintmax_t j = 0; j < cols; j++){
+        for(uint16_t j = 0; j < cols; j++){
             if(nonoSolved[i][j]){
                 concurring = 1;
                 counter++;
@@ -76,13 +76,13 @@ nonogram::nonogram(uintmax_t rowsIn, uintmax_t colsIn)
     }
 
     //create next cols inputs, left to right
-    for(uintmax_t i=0; i < cols; i++) {//more pagefaults
-        uintmax_t inputMax{};
-        uintmax_t inputSum{};
-        std::vector<uintmax_t> toBePushed;
-        uintmax_t counter = 0;
+    for(uint16_t i=0; i < cols; i++) {//more pagefaults
+        uint16_t inputMax{};
+        uint16_t inputSum{};
+        std::vector<uint16_t> toBePushed;
+        uint16_t counter = 0;
         bool concurring =0;
-        for(uintmax_t j=0; j < rows; j++){
+        for(uint16_t j=0; j < rows; j++){
             if(nonoSolved[j][i]){
                 concurring = 1;
                 counter++;
@@ -114,7 +114,7 @@ nonogram::nonogram(uintmax_t rowsIn, uintmax_t colsIn)
     //this could be excluded from a "pure" only solver no UI but the time it
     //takes to create the nonogram and its structures is not part of the benchmark itself (actually solving the nonogram)
 
-    for(uintmax_t i = 0; i < rows; i++){
+    for(uint16_t i = 0; i < rows; i++){
         std::ostringstream ossInts;
         
         for (size_t j = 0; j< nonoInput[i].size(); j++){
@@ -127,7 +127,7 @@ nonogram::nonogram(uintmax_t rowsIn, uintmax_t colsIn)
         nonoInputString.push_back(ossInts.str());
     }
 
-    for(uintmax_t i = 0; i < cols; i++){
+    for(uint16_t i = 0; i < cols; i++){
         std::ostringstream ossInts;
         
         for (size_t j = 0; j< nonoInput[(rows +i)].size(); j++){
@@ -277,8 +277,8 @@ void nonogram::mainLogic(){
 /// @return ratio of how filled nonoWorking matrix is 0 - 1 (so for example 0.33 is 33%)
 double_t nonogram::currentProgress(){
     uintmax_t totalSquares = rows*cols;
-    for(uintmax_t i=0; i < rows; i++){
-        for(uintmax_t j =0; j < cols; j++){
+    for(uint16_t i=0; i < rows; i++){
+        for(uint16_t j =0; j < cols; j++){
             if(nonoWorking[i][2*j]){
                 totalSquares--;
             }
@@ -295,11 +295,11 @@ double_t nonogram::currentProgress(){
 /// @param passedIndex row index. If the passedIndex >= rows it will cause a segfault or unpredictable behaviour. 
 /// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
 /// @return returns whether row is already complete, that is, reconstructed input == nonogram input.
-bool nonogram::isRowComplete(std::vector<std::vector<bool>> *matrix, uintmax_t passedIndex){
-    std::vector<uintmax_t> reconstructedInput;
-    uintmax_t counter  = 0;
+bool nonogram::isRowComplete(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex){
+    std::vector<uint16_t> reconstructedInput;
+    uint16_t counter  = 0;
     bool concurring = 0;
-    for(uintmax_t j = 0; j < cols; j++){
+    for(uint16_t j = 0; j < cols; j++){
         if((*matrix)[passedIndex][2 * j]){
             concurring = 1;
             counter++;
@@ -323,12 +323,12 @@ bool nonogram::isRowComplete(std::vector<std::vector<bool>> *matrix, uintmax_t p
 /// @param passedIndex column index. If the passedIndex >= cols it will cause a segfault or unpredictable behaviour.
 /// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
 /// @return returns True if column is already complete, that is, reconstructed input == nonogram input. False otherwise
-bool nonogram::isColComplete(std::vector<std::vector<bool>> *matrix, uintmax_t passedIndex){
+bool nonogram::isColComplete(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex){
     
-    std::vector<uintmax_t> reconstructedInput;
-    uintmax_t counter  = 0;
+    std::vector<uint16_t> reconstructedInput;
+    uint16_t counter  = 0;
     bool concurring = 0;
-    for(uintmax_t i = 0; i < rows; i++){
+    for(uint16_t i = 0; i < rows; i++){
         if((*matrix)[i][2*passedIndex]){
             concurring = 1;
             counter++;
@@ -354,12 +354,12 @@ bool nonogram::isColComplete(std::vector<std::vector<bool>> *matrix, uintmax_t p
 /// @param passedIndex column index. If the passedIndex >= cols it will cause a segfault or unpredictable behaviour.
 /// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
 /// @return returns False if nonoInputMax < colMax or nonoSum < colSum. True otherwise
-bool nonogram::isColPossible(std::vector<std::vector<bool>> *matrix, uintmax_t passedIndex){
-    uintmax_t colSum{};
-    uintmax_t colMax{};
-    uintmax_t counter  = 0;
+bool nonogram::isColPossible(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex){
+    uint16_t colSum{};
+    uint16_t colMax{};
+    uint16_t counter  = 0;
     bool concurring = 0;
-    for(uintmax_t i = 0; i < rows; i++){
+    for(uint16_t i = 0; i < rows; i++){
         if((*matrix)[i][2*passedIndex]){ 
             concurring = 1;
             counter++;
@@ -391,7 +391,7 @@ bool nonogram::isColPossible(std::vector<std::vector<bool>> *matrix, uintmax_t p
 /// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
 /// @return True if all columns are possible, false otherwise
 bool nonogram::isAllColsPossible(std::vector<std::vector<bool>> *matrix){
-    for(uintmax_t i = 0; i < rows; i++){
+    for(uint16_t i = 0; i < rows; i++){
         if(!(this->isColPossible(matrix, i))){
             return false;
         }
@@ -402,7 +402,7 @@ bool nonogram::isAllColsPossible(std::vector<std::vector<bool>> *matrix){
 /// @brief checks if all cols are complete, thus being a col solution. calls isColComplete for all Columns.
 /// @return False if any column is not complete, true otherwise.
 bool nonogram::isColsSolutionDFS(){
-    for(uintmax_t i =0; i < cols; i++){
+    for(uint16_t i =0; i < cols; i++){
         if(!this->isColComplete(&nonoWorkingDFS, i)){
             return false;
         }
@@ -412,18 +412,18 @@ bool nonogram::isColsSolutionDFS(){
 
 /// @brief calls isRowComplete or isColComplete for all rows and cols. if true for any, greys out any empty cells for that line. 
 void nonogram::greyoutCompletedLines(){
-    for(uintmax_t i = 0; i < rows; i++){ 
+    for(uint16_t i = 0; i < rows; i++){ 
         if(isRowComplete(&nonoWorking, i)){
-            for(uintmax_t j = 0; j < cols; j++){
+            for(uint16_t j = 0; j < cols; j++){
                 if(!nonoWorking[i][2*j]){
                     nonoWorking[i][(2 * j) + 1] = 1;
                 }
             }
         }
     }
-    for(uintmax_t i = 0; i < cols; i++){
+    for(uint16_t i = 0; i < cols; i++){
         if(isColComplete(&nonoWorking, i)){
-            for(uintmax_t j = 0; j < rows; j++){
+            for(uint16_t j = 0; j < rows; j++){
                 if(!nonoWorking[j][(2*i)]){
                     nonoWorking[j][(2 * i) + 1] = 1;
                 }
@@ -832,7 +832,7 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
 /// @brief A depth first search/Inorder traversal of all possibilities. 
 ///Before calling this method make sure to call nonoWorkingDFS = nonoWorking and optionally solveFuuxMethod();
 /// @param index Current row being checked, should be set to 0 unless called from inside the function recursively.
-void nonogram::DFS(uintmax_t index, bool *solutionFound){
+void nonogram::DFS(uint16_t index, bool *solutionFound){
 
     if(index >= rows){ //boolean 
         if( this->isColsSolutionDFS()){
@@ -842,8 +842,8 @@ void nonogram::DFS(uintmax_t index, bool *solutionFound){
     }
 
     //TODO: change printDFS to drawNonoMatrix and link with main
-    uintmax_t spaceAvailable = cols - nonoInputSum[index]; //space available (permitted number of blank space) for this given input
-    uintmax_t whiteRuns = nonoInput[index].size() - 1; // the amount of white runs inbetween black runs for this input
+    uint16_t spaceAvailable = cols - nonoInputSum[index]; //space available (permitted number of blank space) for this given input
+    uint16_t whiteRuns = nonoInput[index].size() - 1; // the amount of white runs inbetween black runs for this input
     if( spaceAvailable == 0) { //This case should have been handled by logic and as such this row is already handled
 
         //this->printDFS();
@@ -858,7 +858,7 @@ void nonogram::DFS(uintmax_t index, bool *solutionFound){
     }
     if(whiteRuns == 0){
         //run all possibilities of this specific case;
-        for(uintmax_t i = 0; i <= spaceAvailable; i++){ //careful with the <=, check isPermutationPossible if confusing.
+        for(uint16_t i = 0; i <= spaceAvailable; i++){ //careful with the <=, check isPermutationPossible if confusing.
             if(isPermutationPossible(nonoInput[index][0], i, index)){
 
                 //this->printDFS();
@@ -878,8 +878,8 @@ void nonogram::DFS(uintmax_t index, bool *solutionFound){
         }
     
         for(permutationVector rowSpace(spaceAvailable, whiteRuns); !rowSpace.allPermutationsIterated; rowSpace++){
-            uintmax_t maxLeftmostSpace = (cols - nonoInputSum[index]) - rowSpace.getSum(); //can't reuse spaceAvailable (whiteRuns case above)
-            for(uintmax_t i = 0; i <= maxLeftmostSpace; i++){  //careful with the <=, check isPermutationPossible if confusing.
+            uint16_t maxLeftmostSpace = (cols - nonoInputSum[index]) - rowSpace.getSum(); //can't reuse spaceAvailable (whiteRuns case above)
+            for(uint16_t i = 0; i <= maxLeftmostSpace; i++){  //careful with the <=, check isPermutationPossible if confusing.
                 if(isPermutationPossible(&rowSpace, i, index)){
                     //this->printDFS();
 
@@ -906,7 +906,7 @@ void nonogram::DFS(uintmax_t index, bool *solutionFound){
 /// @param leftmostSpace white space to the left of first black run
 /// @param rowIndex current row being checked
 /// @return True if permutationVector is possible for given row, False otherwise. 
-bool nonogram::isPermutationPossible(permutationVector* rowSpace, uintmax_t leftmostSpace, uintmax_t rowIndex){
+bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex){
     //DEBUG STATEMENTS
     //std::cout << "checking row:" << rowIndex << " leftmostSpace:" << leftmostSpace << " permVec:";
     //rowSpace->print();
@@ -922,8 +922,8 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uintmax_t left
     //clear current index to hold only the solid logic truth
     nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
 
-    uintmax_t currIndexBuilding{};
-    for(uintmax_t i = 0; i< leftmostSpace; i++){
+    uint16_t currIndexBuilding{};
+    for(uint16_t i = 0; i< leftmostSpace; i++){
         if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)]){ 
             return false;
         }
@@ -937,7 +937,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uintmax_t left
     for(size_t i = 0; i < rowSpace->getNumber().size(); i++){
 
         // marked cells
-        for(uintmax_t j = 0; j < nonoInput[rowIndex][i]; j++){
+        for(uint16_t j = 0; j < nonoInput[rowIndex][i]; j++){
             if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)+1]){ 
                 return false;
             }
@@ -949,7 +949,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uintmax_t left
         }
 
         //greyed cells
-        for(uintmax_t j = 0; j < rowSpace->getNumber()[i]; j++){
+        for(uint16_t j = 0; j < rowSpace->getNumber()[i]; j++){
             if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)]){ 
                 return false;
             }
@@ -963,7 +963,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uintmax_t left
     }
     
     // final marked cells
-    for(uintmax_t i = 0; i < nonoInput[rowIndex][(nonoInput[rowIndex].size()-1)]; i++){
+    for(uint16_t i = 0; i < nonoInput[rowIndex][(nonoInput[rowIndex].size()-1)]; i++){
         if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)+1]){ 
             return false;
         }
@@ -1006,7 +1006,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uintmax_t left
 /// @param leftmostSpace white space to the left of first black run
 /// @param rowIndex current row being checked
 /// @return True if permutationVector is possible for given row, False otherwise. 
-bool nonogram::isPermutationPossible(uintmax_t blackRun, uintmax_t leftmostSpace, uintmax_t rowIndex){
+bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex){
     //DEBUG STATEMENTS
     //std::cout << "checking row:" << rowIndex << " leftmostSpace:" << leftmostSpace << " ";
     //std::cout << blackRun << std::endl;
@@ -1020,8 +1020,8 @@ bool nonogram::isPermutationPossible(uintmax_t blackRun, uintmax_t leftmostSpace
     std::vector<bool> rowPermutationBuilt(2*cols);
     //clear current index to hold only the solid logic truth
     nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
-    uintmax_t currIndexBuilding{};
-    for(uintmax_t i = 0; i< leftmostSpace; i++){
+    uint16_t currIndexBuilding{};
+    for(uint16_t i = 0; i< leftmostSpace; i++){
         if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)]){ 
             return false;
         }
@@ -1030,7 +1030,7 @@ bool nonogram::isPermutationPossible(uintmax_t blackRun, uintmax_t leftmostSpace
     }
     
     // only black run here
-    for(uintmax_t j = 0; j < blackRun; j++){
+    for(uint16_t j = 0; j < blackRun; j++){
         if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)+1]){ 
             return false;
         }

@@ -4,7 +4,7 @@ This folder holds a Imguibased GUI.
 
 changing from openGL to directx would take away the option to move to linux in the future and this is more compatible both ways, so while UI and user convenience do not become a priority it will stay in this format
 
-For details about the actual nonogram solving refer to nonogram.cpp
+For details about the actual nonogram solving refer to nonogram.cpp / nonogram.md
 
 
 ## Usage
@@ -14,10 +14,15 @@ However, obtaining a trusted signature to bypass the Windows defender unrecogniz
 so you can build it yourself:
 
 The process itself should consist of traversing to the root directory (cd Path), and afterwards:
+
 rmdir /S /Q build
+
 mkdir build
+
 cd build
+
 cmake ..
+
 cmake --build .      
 
 Alternatively, install cmake extensions for vscode and do >cmake clean rebuild

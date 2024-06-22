@@ -12,9 +12,9 @@ void drawSolutionNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, float
 int main(){
     //Uncomment if benchmarking wanted, Uncomment #include "benchmarking.h" too
     //getStandardDeviationDuration(200); //This takes around two hours.
-    //runCoveragePercentage(52); //This takes around half an hour
+    runCoveragePercentage(52); //This takes around half an hour
     //std::cout << std::endl;
-    //runDFSBenchmark(100); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
+    runDFSBenchmark(2); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
     
     //default values
     int* rowsIn = new int(5);
@@ -106,14 +106,14 @@ int main(){
         verWidth = ((h - ( (h/40) + verOffsetTxt + 15.0f))/(*rowsIn));
         OneNhalfVerWidth = verWidth/2 + verOffsetTxt + textSize.y/2;
 
-            for(uintmax_t i =0; i< RandoNono->rows; i++ ){
+            for(uint16_t i =0; i< RandoNono->rows; i++ ){
                 drawList->AddText(NULL, 13.0f, 
     
                 ImVec2(10.0f, OneNhalfVerWidth  + (verWidth * i)),
     
                 IM_COL32(200, 200, 200, 235), &((RandoNono->nonoInputString[i])[0]));
             }
-            for(uintmax_t i =0; i< RandoNono->cols; i++ ){
+            for(uint16_t i =0; i< RandoNono->cols; i++ ){
                 drawList->AddText(NULL, 13.0f, 
     
                 ImVec2(OneNHalfHorWidth + (horWidth * i), 10.0f), 
@@ -196,8 +196,8 @@ int main(){
 
 //functions to handle drawing, makes solving process more inefficient but way more visualizable for user
 void drawWorkingNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, std::vector<std::vector<bool>> *matrix, float horOffset, float verOffset, float horWidth, float verWidth){
-    for(uintmax_t i=0; i < RandoNono->rows; i++){
-        for(uintmax_t j =0; j < RandoNono->cols; j++){
+    for(uint16_t i=0; i < RandoNono->rows; i++){
+        for(uint16_t j =0; j < RandoNono->cols; j++){
             
             if((*matrix)[i][2*j]) { 
                 drawList->AddRectFilled(
@@ -230,8 +230,8 @@ void drawWorkingNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, std::v
 }
 
 void drawSolutionNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, float horOffset, float verOffset, float horWidth, float verWidth){
-    for(uintmax_t i=0; i < RandoNono->rows; i++){
-        for(uintmax_t j =0; j < RandoNono->cols; j++){
+    for(uint16_t i=0; i < RandoNono->rows; i++){
+        for(uint16_t j =0; j < RandoNono->cols; j++){
             
             if(RandoNono->nonoSolved[i][j]) { 
                 drawList->AddRectFilled(
