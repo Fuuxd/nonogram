@@ -53,9 +53,10 @@ public: // small performance boost by struct-like behaviour of all public class.
     bool isPermutationPossible(uintmax_t blackRun, uintmax_t leftmostSpace, uintmax_t rowIndex);
     bool isColsSolutionDFS();
 
-    void DFS(uintmax_t index, bool *solutionFound);
-    bool solveDFS();
-
+    void DFS(uintmax_t index, bool *solutionFound,  GLFWwindow* window);
+    bool solveDFS(GLFWwindow* window);
+    
+    void inbetweenDrawWorkingMatrix(GLFWwindow* window);
 };
 
 /// @brief Contradiction that can arise when solving nonogram
