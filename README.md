@@ -1,14 +1,14 @@
 ### About
 
-This folder holds a Imguibased GUI. This is ultimately the way I decided to go 
+This folder holds a Imguibased GUI.
 
-Future plans are to change from openGL to directx but that would take away the option to move to linux in the future and this is more compatible both ways, so while UI and user convenience do not become a priority it will stay in this format
+changing from openGL to directx would take away the option to move to linux in the future and this is more compatible both ways, so while UI and user convenience do not become a priority it will stay in this format
 
 For details about the actual nonogram solving refer to nonogram.cpp
 
 
 ## Usage
-I try to statically link and embed everything so that only using the .exe will suffice for most windows users.
+I try to statically link and embed everything so that only using the .exe [Nonogram.exe](./Nonogram.exe) will suffice for most windows users.
 
 However, obtaining a trusted signature to bypass the Windows defender unrecognized app screen is costly to my knowledge,
 so you can build it yourself:
