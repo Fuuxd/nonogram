@@ -1,0 +1,13 @@
+1 VERSIONINFO
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",      "German Becerra"
+            VALUE "FileDescription",  "Nonogram Solver-Visualizer"
+            VALUE "FileVersion",      "1.0.0"
+            VALUE "ProductName",      "Nonogram"
+        END
+    END
+END
