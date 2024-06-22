@@ -1,6 +1,6 @@
 ### About
 
-This folder holds a Imguibased GUI.
+This folder holds a Imguibased GUI. This branch draws the nonogram inbetween possibilities to see the progress in real time of the DFS method. This adds inefficiency, but is helpful for debugging and looks better for the user. 
 
 changing from openGL to directx would take away the option to move to linux in the future and this is more compatible both ways, so while UI and user convenience do not become a priority it will stay in this format
 
