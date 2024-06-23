@@ -454,7 +454,7 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
     bool edgeFilled = 0; //to avoid filling whole matrix
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxLeft) >= cols){ //ERROR CHECKING 
-            std::cerr << "ERROR ON SIMPLE BOXES 1";
+            //std::cerr << "ERROR ON SIMPLE BOXES 1";
             throw std::runtime_error("Pre-SegFault EBoxes1");
         }
         //EDGE FILL
@@ -463,6 +463,9 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
             if((*edgemostInt) && (*edge) && !edgeFilled){
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
+                    if( (*maxLeft)+m >= rows){
+                        throw std::runtime_error("Pre-SegFault edgeFill EB1");
+                    }
                     (*matrix)[i][2*((*maxLeft)+m)] = 1;
                 }
 
@@ -473,6 +476,9 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
             } else if((*edgemostInt) && !edgeFilled){ 
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
                     //Glue happens 
+                    if( (*maxLeft)+m >= rows){
+                        throw std::runtime_error("Pre-SegFault edgeFill EB3");
+                    }
                     (*matrix)[i][2* ((*maxLeft)+ m )] = 1;
                 }
 
@@ -559,7 +565,7 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
     bool edgeFilled = 0; //avoid filling whole matrix
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxRight) < 0){ //ERROR CHECKING 
-            std::cerr << "ERROR ON SIMPLE BOXES 2, on row:"<< i;
+            //std::cerr << "ERROR ON SIMPLE BOXES 2, on row:"<< i;
             throw std::runtime_error("Pre-SegFault EBoxes2");
         }
         //EDGE FILL
@@ -568,6 +574,9 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
             if((*edgemostInt) && (*edge) && !edgeFilled){
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
+                    if( (*maxRight)-m < 0){
+                        throw std::runtime_error("Pre-SegFault Edge EB2");
+                    }
                     (*matrix)[i][2*((*maxRight)-m)] = 1;
                 }
                 if( (*maxRight)-inputIntCurr >= 0){
@@ -577,6 +586,9 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
                 edgeFilled = 1;
             } else if((*edgemostInt)){
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
+                    if( (*maxRight)-m < 0){
+                        throw std::runtime_error("Pre-SegFault Glue EB2");
+                    }
                     (*matrix)[i][2* ((*maxRight)- m )] = 1;
                 }
 
@@ -651,7 +663,7 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
     bool edgeFilled = 0;//avoid filling whole matrix
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxTop) >= rows){ //ERROR CHECKING 
-            std::cerr << "ERROR ON SIMPLE BOXES 3";
+            //std::cerr << "ERROR ON SIMPLE BOXES 3";
             throw std::runtime_error("Pre-SegFault EBoxes3");
         }
         //EDGE FILL
@@ -660,6 +672,9 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
             if((*edgemostInt) && (*edge) && !edgeFilled){
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
+                    if( (*maxTop)+m >= rows){
+                        throw std::runtime_error("Pre-SegFault edgeFill EB3");
+                    }
                     (*matrix)[(*maxTop)+m][2*columnsHere] = 1;
                 }
 
@@ -670,6 +685,9 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
             } else if((*edgemostInt) && !edgeFilled){
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
                     //Glue happens 
+                    if( (*maxTop) + m >= rows){
+                        throw std::runtime_error("Pre-SegFault Glue EB3");
+                    }
                     (*matrix)[(*maxTop)+ m][2* columnsHere] = 1;
                 }
 
@@ -755,7 +773,7 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
     bool edgeFilled =0; // avoid filling whole matrix
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxBot) < 0){ //ERROR CHECKING 
-            std::cerr << "ERROR ON SIMPLE BOXES 4";
+            //std::cerr << "ERROR ON SIMPLE BOXES 4";
             throw std::runtime_error("Pre-SegFault EBoxes4");
         }
         //EDGE FILL
@@ -764,6 +782,9 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
             if((*edgemostInt) && (*edge) && !edgeFilled){ //this condition could be wonky here 
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
+                    if( (*maxBot)-m < 0){
+                        throw std::runtime_error("Pre-SegFault edgeFill EB4");
+                    }
                     (*matrix)[(*maxBot)-m][2*columnsHere] = 1;
                 }
                 
@@ -774,6 +795,9 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
                 
             } else if((*edgemostInt)){
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
+                    if( (*maxBot)-m < 0){
+                        throw std::runtime_error("Pre-SegFault Glue EB4");
+                    }
                     (*matrix)[(*maxBot)- m][2* columnsHere] = 1;
                 }
 
@@ -1021,7 +1045,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftm
     }
     catch(const std::exception& e)// if literally anthing wrong just clear below and return false
     {
-        std::cerr << e.what() << '\n';
+        //std::cerr << e.what() << '\n';
         for(uint16_t i = rowIndex; i < cols; i++){
             nonoWorkingDFS[i] = nonoWorking[i];
         }

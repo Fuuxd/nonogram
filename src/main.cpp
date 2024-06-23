@@ -14,7 +14,7 @@ int main(){
     //getStandardDeviationDuration(200); //This takes around two hours.
     //runCoveragePercentage(52); //This takes around half an hour
     //std::cout << std::endl;
-    runDFSBenchmark(2); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
+    runDFSBenchmark(10); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
     
     //default values
     int* rowsIn = new int(5);
