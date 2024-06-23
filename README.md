@@ -10,6 +10,8 @@ For details about the actual nonogram solving refer to nonogram.cpp / nonogram.m
 ## Usage
 I try to statically link and embed everything so that only using the .exe [Nonogram.exe](./Nonogram.exe) will suffice for most windows users.
 
+If you are a user interested solely on the visualization of the solving process, I recommend using the GUIMerge branch instead of main.
+
 However, obtaining a trusted signature to bypass the Windows defender unrecognized app screen is costly to my knowledge,
 so you can build it yourself:
 

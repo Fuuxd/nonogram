@@ -69,7 +69,7 @@ double_t coveragePercentage = 0;
         //
 
         std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-        nonoCoverage->solveLogicMethod();
+        nonoCoverage->solveLogicMethod(&nonoCoverage->nonoWorking);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         duration = duration + std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
@@ -216,7 +216,7 @@ void getStandardDeviationDuration(uintmax_t iterationsPerSize, uint16_t size = 1
             //
 
             std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-            nonoCoverage->solveLogicMethod();
+            nonoCoverage->solveLogicMethod(&nonoCoverage->nonoWorking);
             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
             duration = duration + std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 

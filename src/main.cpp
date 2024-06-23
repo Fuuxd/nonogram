@@ -12,7 +12,7 @@ void drawSolutionNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, float
 int main(){
     //Uncomment if benchmarking wanted, Uncomment #include "benchmarking.h" too
     //getStandardDeviationDuration(200); //This takes around two hours.
-    runCoveragePercentage(52); //This takes around half an hour
+    //runCoveragePercentage(52); //This takes around half an hour
     //std::cout << std::endl;
     runDFSBenchmark(2); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
     
@@ -169,7 +169,7 @@ int main(){
         }
 
         if (ImGui::Button("Pure Logic")){
-            RandoNono->solveLogicMethod();
+            RandoNono->solveLogicMethod(&RandoNono->nonoWorking);
         }
 
         if (ImGui::Button("DFS")){

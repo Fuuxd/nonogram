@@ -39,14 +39,14 @@ public: // small performance boost by struct-like behaviour of all public class.
 
     void greyoutCompletedLines();
 
-    void solveLogicMethod();
+    void solveLogicMethod(std::vector<std::vector<bool>> *matrix);
 
-    void mainLogic();
+    void mainLogic(std::vector<std::vector<bool>> *matrix);
 
-    void logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxLeft);
-    void logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxRight);
-    void logicColTopToBot(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxTop);
-    void logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot);
+    void logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxLeft, std::vector<std::vector<bool>> *matrix);
+    void logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxRight, std::vector<std::vector<bool>> *matrix);
+    void logicColTopToBot(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxTop, std::vector<std::vector<bool>> *matrix);
+    void logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot, std::vector<std::vector<bool>> *matrix);
 
 
     bool isPermutationPossible(permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex);
@@ -55,6 +55,7 @@ public: // small performance boost by struct-like behaviour of all public class.
 
     void DFS(uint16_t index, bool *solutionFound);
     bool solveDFS();
+    void copyRowsBelow(uint16_t index, std::vector<std::vector<bool>> *copyTo, std::vector<std::vector<bool>> *copyFrom);
 
 };
 

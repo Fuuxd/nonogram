@@ -166,7 +166,7 @@ void nonogram::print(std::vector<std::vector<bool>> *matrix, bool isWorkingMatri
 }
 
 /// @brief solve all logically obtainable data. calls mainLogic() multiple times until no more information can be obtained
-void nonogram::solveLogicMethod(){
+void nonogram::solveLogicMethod(std::vector<std::vector<bool>> *matrix){
 
     this->solveZeroCase();
     float prevProgress = this->currentProgress();
@@ -176,7 +176,7 @@ void nonogram::solveLogicMethod(){
             do{
                 prevProgress = progress;
                 
-                this->mainLogic();
+                this->mainLogic(matrix);
 
                 progress = this->currentProgress();
             } while(progress != prevProgress);
@@ -211,34 +211,37 @@ void nonogram::solveZeroCase(){
 }
 
 /// @brief pass through all rows and columns once, obtains all information possible this passthrough. all methods based on Wikipedia's "Solution Techniques" section
-void nonogram::mainLogic(){
+/// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
+void nonogram::mainLogic(std::vector<std::vector<bool>> *matrix){
     //left = top, right = bottom
     //rows
     for(int i =0; i < rows; i++){
         //this following for loop is specifically interesting to multithread/parallelize/unroll
         for(int j =0; j < nonoInput[i].size(); j++){ //iterating through current std::vector<int> 
-            bool* edge = new bool(1), *edgemostInt = new bool(1);
+            bool edge = 1, edgemostInt = 1;
 
             //start with left k to j = index of number goal
-            int *maxLeft = new int(0);  //SIMPLE BOXES
+            int maxLeft = 0;  //SIMPLE BOXES
             for(int k = 0; k <= j; k++){ //iterate through indexes until j
-                logicRowLeftToRight(i, j, k, edgemostInt, edge, maxLeft);
+                logicRowLeftToRight(i, j, k, &edgemostInt, &edge, &maxLeft, matrix);
             }
             
-            *edge =1, *edgemostInt = 1;
+            edge =1, edgemostInt = 1;
 
 
             //now right, (starting from the right ) 
-            int *maxRight = new int(cols - 1);
+            int maxRight = cols-1;
             for(int k = nonoInput[i].size()-1; k >= j; k--){ //iterate through indexes until j
-                logicRowRightToLeft(i, j, k, edgemostInt, edge, maxRight);
+                logicRowRightToLeft(i, j, k, &edgemostInt, &edge, &maxRight, matrix);
             }      
 
-            for(int k = *maxRight; k <= *maxLeft; k++){  
-                nonoWorking[i][2*k] = 1;
+            for(int k = maxRight; k <= maxLeft; k++){  
+                if(k < 0 || k >= cols){
+                    throw std::runtime_error("Pre-SegFault mainLogRows");
+                }
+                (*matrix)[i][2*k] = 1;
             }
 
-            delete edge, edgemostInt, maxLeft, maxRight;
         }
     }
 
@@ -249,26 +252,29 @@ void nonogram::mainLogic(){
         //this following for loop is specifically interesting to multithread/parallelize/unroll
         for(int j =0; j < nonoInput[i].size(); j++){ //iterating through current std::vector<int> 
         //keep current maximum index obtained 
-            bool* edge = new bool(1), *edgemostInt = new bool(1); 
+            bool edge = 1, edgemostInt = 1; 
 
             //from top, j = index of number are getting to 
-            int* maxTop = new int(0);  //SIMPLE BOXES
+            int maxTop = 0;  //SIMPLE BOXES
             for(int k = 0; k <= j; k++){ //iterate through indexes until j
-                logicColTopToBot(i, j, k, columnsHere, edgemostInt, edge, maxTop);
+                logicColTopToBot(i, j, k, columnsHere, &edgemostInt, &edge, &maxTop, matrix);
             }
             
-            *edge =1, *edgemostInt = 1;
+            edge =1, edgemostInt = 1;
 
             //now bottom, (bottom to top) 
-            int* maxBot = new int(rows -1);
+            int maxBot = rows -1;
             for(int k = nonoInput[i].size()-1; k >= j; k--){ //iterate through indexes until j
-                logicColBotToTop(i, j, k, columnsHere, edgemostInt, edge, maxBot);
+                logicColBotToTop(i, j, k, columnsHere, &edgemostInt, &edge, &maxBot, matrix);
             }      
 
-            for(int k = *maxBot; k <= *maxTop; k++){
-                nonoWorking[k][2*columnsHere] = 1;
+            for(int k = maxBot; k <= maxTop; k++){
+                if(k < 0 || k >= rows){
+                    throw std::runtime_error("Pre-SegFault mainLogCols");
+                }
+                (*matrix)[k][2*columnsHere] = 1;
             }
-            delete edge, edgemostInt, maxTop, maxBot;
+
         }
     }
 }
@@ -329,7 +335,10 @@ bool nonogram::isColComplete(std::vector<std::vector<bool>> *matrix, uint16_t pa
     uint16_t counter  = 0;
     bool concurring = 0;
     for(uint16_t i = 0; i < rows; i++){
-        if((*matrix)[i][2*passedIndex]){
+        if((*matrix)[i][2*passedIndex]){ //check if contradiction
+            if((*matrix)[i][(2*passedIndex)+1]){
+                return false;
+            }
             concurring = 1;
             counter++;
         } else if(concurring){
@@ -361,6 +370,9 @@ bool nonogram::isColPossible(std::vector<std::vector<bool>> *matrix, uint16_t pa
     bool concurring = 0;
     for(uint16_t i = 0; i < rows; i++){
         if((*matrix)[i][2*passedIndex]){ 
+            if((*matrix)[i][(2*passedIndex)+1]){
+                return false;
+            }
             concurring = 1;
             counter++;
             colSum++;
@@ -434,7 +446,8 @@ void nonogram::greyoutCompletedLines(){
 }
 
 /// @brief optimized logic as described on wikipedia
-void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxLeft){
+/// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
+void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxLeft, std::vector<std::vector<bool>> *matrix){
 
     int inputIntCurr =nonoInput[i][k];
     
@@ -442,32 +455,32 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxLeft) >= cols){ //ERROR CHECKING 
             std::cerr << "ERROR ON SIMPLE BOXES 1";
-            return;
+            throw std::runtime_error("Pre-SegFault EBoxes1");
         }
         //EDGE FILL
             
-        if(nonoWorking[i][(2*(*maxLeft))]){ //FILLED BOX
+        if((*matrix)[i][(2*(*maxLeft))]){ //FILLED BOX
             if((*edgemostInt) && (*edge) && !edgeFilled){
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
-                    nonoWorking[i][2*((*maxLeft)+m)] = 1;
+                    (*matrix)[i][2*((*maxLeft)+m)] = 1;
                 }
 
                 if( (*maxLeft) + inputIntCurr < cols){
-                    nonoWorking[i][2*((*maxLeft)+inputIntCurr)+1] =1;
+                    (*matrix)[i][2*((*maxLeft)+inputIntCurr)+1] =1;
                 }
                 edgeFilled = 1;
             } else if((*edgemostInt) && !edgeFilled){ 
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
                     //Glue happens 
-                    nonoWorking[i][2* ((*maxLeft)+ m )] = 1;
+                    (*matrix)[i][2* ((*maxLeft)+ m )] = 1;
                 }
 
             } 
 
             
         }
-        else if (nonoWorking[i][(2*(*maxLeft))+1]){ //GREY BOX - (crossed out box)
+        else if ((*matrix)[i][(2*(*maxLeft))+1]){ //GREY BOX - (crossed out box)
                 
             //SIMPLE SPACES
             if(!(*edge) && (*edgemostInt)){ 
@@ -475,10 +488,10 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
                 for (int m = 1 ; m <= inputIntCurr; m++){
                     if((*maxLeft)-m < 0){ // //check here to reduce indentations
                         break;
-                    } else if(nonoWorking[i][(2* ((*maxLeft) - m))+1]){
+                    } else if((*matrix)[i][(2* ((*maxLeft) - m))+1]){
                         break;
                     }else{
-                        nonoWorking[i][(2* ((*maxLeft) - m))+1] = 1;
+                        (*matrix)[i][(2* ((*maxLeft) - m))+1] = 1;
                     }
 
 
@@ -501,19 +514,19 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
 
 
     //if k==j this is the last index 
-    if(k==j && (*maxLeft) + 1 < cols && nonoWorking[i][2*( (*maxLeft) + 1)] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square (after loops above) has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
+    if(k==j && (*maxLeft) + 1 < cols && (*matrix)[i][2*( (*maxLeft) + 1)] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square (after loops above) has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
 
         int l = 1; //mercuryDrip need for it to be in context for next for loop
         for(l = 1; l <= inputIntCurr; l++){
             if((*maxLeft) + l < cols){
-                if(nonoWorking[i][(2*((*maxLeft) + l)) + 1]){  //GREY
+                if((*matrix)[i][(2*((*maxLeft) + l)) + 1]){  //GREY
                     //if grey adjacent to the mercury enabled spot, fill from mercury spot until integer completely filled, 
                     for(int m = 0; m <= (inputIntCurr - l); m++){
-                        nonoWorking[i][((*maxLeft) - m)*2] = 1;
+                        (*matrix)[i][((*maxLeft) - m)*2] = 1;
                     }
                     //after filling break and go to greyout below
                     break;
-                } else if( !nonoWorking[i][2*((*maxLeft) + l)]){ //BLANK
+                } else if( !(*matrix)[i][2*((*maxLeft) + l)]){ //BLANK
                     break; // break and go to greyout below
                 }
             } else{
@@ -523,7 +536,7 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
 
         for(int m = ((*maxLeft) - inputIntCurr + 1); m < ((*maxLeft) - inputIntCurr + l); m++){
             //greyout at m = maxLeft
-            nonoWorking[i][(m * 2)+1] = 1;
+            (*matrix)[i][(m * 2)+1] = 1;
         }
 
     }                
@@ -538,7 +551,8 @@ void nonogram::logicRowLeftToRight(int i, int j, int k, bool* edgemostInt, bool*
 }
 
 /// @brief optimized logic as described on wikipedia
-void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxRight){
+/// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
+void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool* edge, int* maxRight, std::vector<std::vector<bool>> *matrix){
         
     int inputIntCurr =nonoInput[i][k];
 
@@ -546,41 +560,41 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxRight) < 0){ //ERROR CHECKING 
             std::cerr << "ERROR ON SIMPLE BOXES 2, on row:"<< i;
-            return;
+            throw std::runtime_error("Pre-SegFault EBoxes2");
         }
         //EDGE FILL
         
-        if(nonoWorking[i][(2*(*maxRight))]){ //FILLED BOX
+        if((*matrix)[i][(2*(*maxRight))]){ //FILLED BOX
             if((*edgemostInt) && (*edge) && !edgeFilled){
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
-                    nonoWorking[i][2*((*maxRight)-m)] = 1;
+                    (*matrix)[i][2*((*maxRight)-m)] = 1;
                 }
                 if( (*maxRight)-inputIntCurr >= 0){
-                    nonoWorking[i][(2*((*maxRight)-inputIntCurr))+1] =1;
+                    (*matrix)[i][(2*((*maxRight)-inputIntCurr))+1] =1;
                 }
                 
                 edgeFilled = 1;
             } else if((*edgemostInt)){
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
-                    nonoWorking[i][2* ((*maxRight)- m )] = 1;
+                    (*matrix)[i][2* ((*maxRight)- m )] = 1;
                 }
 
             } 
 
             
         }
-        else if (nonoWorking[i][(2*(*maxRight))+1]){ //GREY BOX - (crossed out box)
+        else if ((*matrix)[i][(2*(*maxRight))+1]){ //GREY BOX - (crossed out box)
             //SIMPLE SPACES
             if(!(*edge) && (*edgemostInt)){ 
                 //ALL PREVIOUS holes backwards until meeting a grey space or getting to 0 -> become grey
                 for (int m = 1 ; m <= inputIntCurr; m++){
                     if((*maxRight)+m >= cols){ //check here to reduce indentations
                         break;
-                    } else if(nonoWorking[i][(2* ((*maxRight) + m))+1]){
+                    } else if((*matrix)[i][(2* ((*maxRight) + m))+1]){
                         break;
                     }else{
-                        nonoWorking[i][(2* ((*maxRight) + m))+1] = 1;
+                        (*matrix)[i][(2* ((*maxRight) + m))+1] = 1;
                     }
                 }
             }
@@ -597,18 +611,18 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
         
     }
 
-    if(k==j && (*maxRight) - 1 >= 0 && nonoWorking[i][2*( (*maxRight) - 1)] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
+    if(k==j && (*maxRight) - 1 >= 0 && (*matrix)[i][2*( (*maxRight) - 1)] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
         int l = 1; //mercuryDrip need for it to be in context for next for loop
         for(l = 1; l <= inputIntCurr; l++){
             if((*maxRight) - l >= 0){
-                if(nonoWorking[i][(2*((*maxRight) - l)) + 1]){  //GREY
+                if((*matrix)[i][(2*((*maxRight) - l)) + 1]){  //GREY
                     //if grey adjacent to the mercury enabled spot, fill from mercury spot until integer completely filled, 
                     for(int m = 0; m <= (inputIntCurr - l); m++){
-                        nonoWorking[i][((*maxRight) + m)*2] = 1;
+                        (*matrix)[i][((*maxRight) + m)*2] = 1;
                     }
                     //after filling break and go to greyout below
                     break;
-                } else if( !nonoWorking[i][2*((*maxRight) - l)]){ //BLANK
+                } else if( !(*matrix)[i][2*((*maxRight) - l)]){ //BLANK
                     break; // break and go to greyout below
                 } 
             }else{
@@ -618,7 +632,7 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
 
         for(int m = ((*maxRight) + inputIntCurr - 1); m > ((*maxRight) + inputIntCurr - l); m--){
             //greyout at m = maxRight
-            nonoWorking[i][(m * 2)+1] = 1;
+            (*matrix)[i][(m * 2)+1] = 1;
         }
 
     }
@@ -630,39 +644,40 @@ void nonogram::logicRowRightToLeft(int i, int j, int k, bool* edgemostInt, bool*
 }
 
 /// @brief optimized logic as described on wikipedia
-void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxTop){
+/// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
+void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxTop, std::vector<std::vector<bool>> *matrix){
     int inputIntCurr =nonoInput[i][k];
 
     bool edgeFilled = 0;//avoid filling whole matrix
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxTop) >= rows){ //ERROR CHECKING 
             std::cerr << "ERROR ON SIMPLE BOXES 3";
-            return;
+            throw std::runtime_error("Pre-SegFault EBoxes3");
         }
         //EDGE FILL
         
-        if(nonoWorking[(*maxTop)][2 * columnsHere]){ //FILLED BOX
+        if((*matrix)[(*maxTop)][2 * columnsHere]){ //FILLED BOX
             if((*edgemostInt) && (*edge) && !edgeFilled){
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
-                    nonoWorking[(*maxTop)+m][2*columnsHere] = 1;
+                    (*matrix)[(*maxTop)+m][2*columnsHere] = 1;
                 }
 
                 if( (*maxTop) + inputIntCurr < rows){
-                    nonoWorking[(*maxTop)+inputIntCurr][(2*columnsHere)+1] =1;
+                    (*matrix)[(*maxTop)+inputIntCurr][(2*columnsHere)+1] =1;
                 }
                 edgeFilled = 1;
             } else if((*edgemostInt) && !edgeFilled){
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
                     //Glue happens 
-                    nonoWorking[(*maxTop)+ m][2* columnsHere] = 1;
+                    (*matrix)[(*maxTop)+ m][2* columnsHere] = 1;
                 }
 
             } 
 
             
         }
-        else if (nonoWorking[(*maxTop)][(2*columnsHere)+1]){ //GREY BOX - (crossed out box)
+        else if ((*matrix)[(*maxTop)][(2*columnsHere)+1]){ //GREY BOX - (crossed out box)
                 
 
             //SIMPLE SPACES
@@ -671,10 +686,10 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
                 for (int m = 1 ; m <= inputIntCurr; m++){
                     if((*maxTop)-m < 0){ //check here to reduce indentations
                         break;
-                    } else if(nonoWorking[(*maxTop) - m][(2* columnsHere)+1]){
+                    } else if((*matrix)[(*maxTop) - m][(2* columnsHere)+1]){
                         break;
                     }else{
-                        nonoWorking[(*maxTop) - m][(2* columnsHere)+1] = 1;
+                        (*matrix)[(*maxTop) - m][(2* columnsHere)+1] = 1;
                     }
 
 
@@ -696,18 +711,18 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
 
 
     //if k==j this is the last index 
-    if(k==j && (*maxTop) + 1 < rows && nonoWorking[( (*maxTop) + 1)][2*columnsHere] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
+    if(k==j && (*maxTop) + 1 < rows && (*matrix)[( (*maxTop) + 1)][2*columnsHere] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
         int l = 1; //mercuryDrip need for it to be in context for next for loop
         for(l = 1; l <= inputIntCurr; l++){ 
             if((*maxTop) + l < rows){
-                if(nonoWorking[((*maxTop) + l)][(2*columnsHere) + 1]){  //GREY
+                if((*matrix)[((*maxTop) + l)][(2*columnsHere) + 1]){  //GREY
                     //if grey adjacent to the mercury enabled spot, fill from mercury spot until integer completely filled, 
                     for(int m = 0; m <= (inputIntCurr - l); m++){
-                        nonoWorking[((*maxTop) - m)][columnsHere*2] = 1;
+                        (*matrix)[((*maxTop) - m)][columnsHere*2] = 1;
                     }
                     //after filling break and go to greyout below
                     break;
-                } else if( !nonoWorking[((*maxTop) + l)][2*columnsHere]){ //BLANK
+                } else if( !(*matrix)[((*maxTop) + l)][2*columnsHere]){ //BLANK
                     break; // break and go to greyout below
                 }                          
             }else{
@@ -716,7 +731,7 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
         }
         for(int m = ((*maxTop) - inputIntCurr + 1); m < ((*maxTop) - inputIntCurr + l); m++){
             //greyout at m = maxTop
-            nonoWorking[m][(columnsHere * 2)+1] = 1;
+            (*matrix)[m][(columnsHere * 2)+1] = 1;
                 
         }
 
@@ -732,7 +747,8 @@ void nonogram::logicColTopToBot(int i, int j, int k, int columnsHere, bool* edge
 }
 
 /// @brief optimized logic as described on wikipedia
-void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot){
+/// @param matrix a matrix where nonogram is trying to be solved (it holds grey cells, two bools per cell). Normally denoted by "Working" in matrix name
+void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot, std::vector<std::vector<bool>> *matrix){
     
     int inputIntCurr =nonoInput[i][k];
     
@@ -740,31 +756,31 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
     for(int l = 0; l < inputIntCurr; l++){ //iterate through matrix current integer times
         if((*maxBot) < 0){ //ERROR CHECKING 
             std::cerr << "ERROR ON SIMPLE BOXES 4";
-            return;
+            throw std::runtime_error("Pre-SegFault EBoxes4");
         }
         //EDGE FILL
         
-        if(nonoWorking[(*maxBot)][2* columnsHere]){ //FILLED BOX
+        if((*matrix)[(*maxBot)][2* columnsHere]){ //FILLED BOX
             if((*edgemostInt) && (*edge) && !edgeFilled){ //this condition could be wonky here 
                 // FILL IN this edge and add grey at the end
                 for(int m = 0; m < inputIntCurr; m++){
-                    nonoWorking[(*maxBot)-m][2*columnsHere] = 1;
+                    (*matrix)[(*maxBot)-m][2*columnsHere] = 1;
                 }
                 
                 if( (*maxBot)-inputIntCurr >= 0){
-                    nonoWorking[(*maxBot)-inputIntCurr][(2 * columnsHere) +1] =1;
+                    (*matrix)[(*maxBot)-inputIntCurr][(2 * columnsHere) +1] =1;
                 }
                 edgeFilled = 1; 
                 
             } else if((*edgemostInt)){
                 for(int m = 0; m <inputIntCurr-l; m++){ //GLUE
-                    nonoWorking[(*maxBot)- m][2* columnsHere] = 1;
+                    (*matrix)[(*maxBot)- m][2* columnsHere] = 1;
                 }
 
             } 
 
         }
-        else if (nonoWorking[(*maxBot)][(2*columnsHere)+1]){ //GREY BOX - (crossed out box)
+        else if ((*matrix)[(*maxBot)][(2*columnsHere)+1]){ //GREY BOX - (crossed out box)
                 
 
             //SIMPLE SPACES
@@ -773,10 +789,10 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
                 for (int m = 1 ; m <= inputIntCurr; m++){
                     if((*maxBot)+m >= rows){ //check here to reduce indentations
                         break;
-                    } else if(nonoWorking[(*maxBot) + m][(2* columnsHere)+1]){
+                    } else if((*matrix)[(*maxBot) + m][(2* columnsHere)+1]){
                         break;
                     }else{
-                        nonoWorking[(*maxBot) + m][(2* columnsHere)+1] = 1;
+                        (*matrix)[(*maxBot) + m][(2* columnsHere)+1] = 1;
                     }
 
 
@@ -797,18 +813,18 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
     }
 
     //if k==j this is the last index 
-    if(k==j && (*maxBot) - 1 >= 0 && nonoWorking[( (*maxBot) - 1)][2*columnsHere] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
+    if(k==j && (*maxBot) - 1 >= 0 && (*matrix)[( (*maxBot) - 1)][2*columnsHere] && (*edgemostInt)){ //IF NOT OUT OF BOUNDS, check if next square has the NONOGRAM FILLED (SHORT CIRCUIT EVALUATION PREVENTS ERROR)
         int l = 1; //mercuryDrip need for it to be in context for next for loop
         for(l = 1; l <= inputIntCurr; l++){
             if((*maxBot) - l >= 0){
-                if(nonoWorking[((*maxBot) - l)][(2*columnsHere) + 1]){  //GREY
+                if((*matrix)[((*maxBot) - l)][(2*columnsHere) + 1]){  //GREY
                     //if grey adjacent to the mercury enabled spot, fill from mercury spot until integer completely filled, 
                     for(int m = 0; m <= (inputIntCurr - l); m++){
-                        nonoWorking[((*maxBot) + m)][columnsHere*2] = 1;
+                        (*matrix)[((*maxBot) + m)][columnsHere*2] = 1;
                     }
                     //after filling break and go to greyout below
                     break;
-                } else if( !nonoWorking[((*maxBot) - l)][2*columnsHere]){ //BLANK
+                } else if( !(*matrix)[((*maxBot) - l)][2*columnsHere]){ //BLANK
                     break; // break and go to greyout below
                 }
             }else{
@@ -818,7 +834,7 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
 
         for(int m = ((*maxBot) + inputIntCurr - 1); m > ((*maxBot) + inputIntCurr - l); m--){
             //greyout at m = maxBot
-            nonoWorking[m][(columnsHere * 2)+1] = 1;
+            (*matrix)[m][(columnsHere * 2)+1] = 1;
         }
     } 
     
@@ -827,7 +843,6 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
     }
     if(!(*edge)){(*edgemostInt) =0;}
 }
-
 
 /// @brief A depth first search/Inorder traversal of all possibilities. 
 ///Before calling this method make sure to call nonoWorkingDFS = nonoWorking and optionally solveFuuxMethod();
@@ -852,8 +867,11 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
     
         if(*solutionFound){
             return;
-        }else if (index + 1 < rows){
-            nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
+        }else if (index + 1 < rows){ //clear all below if solution not found
+            //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
+            for(uint16_t i = index+1; i < cols; i++){
+                nonoWorkingDFS[i] = nonoWorking[i];
+            }
         }
     }
     if(whiteRuns == 0){
@@ -866,8 +884,11 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
 
                 if(*solutionFound){
                     return;
-                }else if (index + 1 < rows){
-                    nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
+                }else if (index + 1 < rows){ //clear all below if solution not found
+                    //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
+                    for(uint16_t i = index+1; i < cols; i++){
+                        nonoWorkingDFS[i] = nonoWorking[i];
+                    }
                 }
 
             }
@@ -887,8 +908,11 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
 
                     if(*solutionFound){
                         return;
-                    }else if (index + 1 < rows){
-                        nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
+                    }else if (index + 1 < rows){//clear all below if solution not found
+                        //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
+                        for(uint16_t i = index+1; i < cols; i++){
+                            nonoWorkingDFS[i] = nonoWorking[i];
+                        }
                     }
 
                 }
@@ -991,9 +1015,25 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftm
     //
     ///check if COLS works 
     //
+    try
+    {
+        this->solveLogicMethod(&nonoWorkingDFS);
+    }
+    catch(const std::exception& e)// if literally anthing wrong just clear below and return false
+    {
+        std::cerr << e.what() << '\n';
+        for(uint16_t i = rowIndex; i < cols; i++){
+            nonoWorkingDFS[i] = nonoWorking[i];
+        }
+        return false;
+    }
+    
+    
 
     if(!this->isAllColsPossible(&nonoWorkingDFS)){
-        nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
+        for(uint16_t i = rowIndex; i < cols; i++){
+            nonoWorkingDFS[i] = nonoWorking[i];
+        }
         return false;
     };
 
@@ -1068,7 +1108,7 @@ bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, 
 bool nonogram::solveDFS(){
 
     //if benchmarking, consider commenting out the next line.
-    this->solveLogicMethod();
+    this->solveLogicMethod(&nonoWorking);
     nonoWorkingDFS = nonoWorking;
     bool solutionFound(false);
     try
