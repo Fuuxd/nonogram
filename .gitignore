@@ -32,3 +32,6 @@
 
 # Ignore everything in the build folder
 build/
+
+# data set I can't distribute of nonograms
+src/dataSetNonograms.h

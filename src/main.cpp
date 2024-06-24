@@ -14,14 +14,16 @@ int main(){
     //getStandardDeviationDuration(200); //This takes around two hours.
     //runCoveragePercentage(52); //This takes around half an hour
     //std::cout << std::endl;
-    runDFSBenchmark(10); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
+    //runDFSBenchmark(100); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
+    //runWebpnDataset();
     
     //default values
     int* rowsIn = new int(5);
     int* colsIn = new int(5);
 
     //CREATE RANDOM NONOGRAM
-    nonogram* RandoNono = new nonogram(*rowsIn, *colsIn);
+    //nonogram* RandoNono = new nonogram(*rowsIn, *colsIn);
+    nonogram* RandoNono = new nonogram(webpbn2413);
     RandoNono->solveZeroCase();
     //RandoNono->print(); //Debug Statement 
     //RandoNono->mainLogicFuux();

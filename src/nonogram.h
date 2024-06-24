@@ -14,7 +14,7 @@ public: // small performance boost by struct-like behaviour of all public class.
     std::vector<std::vector<bool>> nonoWorking; //working on solution here holds two bools per cell
     std::vector<std::vector<bool>> nonoWorkingDFS; //working on solution FOR DFS here holds two bools per cell
     std::vector<std::vector<uint16_t>> nonoInput; // first rows vectors are the rows input top to bottom and next cols vectors are the cols input left to right.
-    std::vector<uint16_t> nonoInputMax;
+    std::vector<uint16_t> nonoInputMax; //maximum number in index of nonoInput
     std::vector<uint16_t> nonoInputSum;
     
 
@@ -24,6 +24,7 @@ public: // small performance boost by struct-like behaviour of all public class.
     size_t maxVer =0; // maximum number of digits vertically
 
     nonogram(uint16_t rowsIn, uint16_t colsIn);
+    nonogram(const int *data);
     ~nonogram();
 
     bool isRowComplete(std::vector<std::vector<bool>> *matrix, uint16_t passedIndex);

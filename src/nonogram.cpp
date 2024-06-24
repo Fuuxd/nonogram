@@ -142,6 +142,94 @@ nonogram::nonogram(uint16_t rowsIn, uint16_t colsIn)
     
 }
 
+nonogram::nonogram(const int *data){
+    size_t currIndexData = 0;
+    cols = (uint16_t)data[currIndexData];
+    currIndexData++;
+    rows = (uint16_t)data[currIndexData];
+    currIndexData++;
+
+    std::vector<std::vector<bool>> matrix2( (rows), std::vector<bool>( (2 * cols), false) );
+    nonoWorking = matrix2;
+    nonoWorkingDFS = matrix2;
+
+    std::vector<std::vector<uint16_t>> columnVectors;
+    std::vector<uint16_t> maxesCols;
+    std::vector<uint16_t> sumsCols;
+    for(uint16_t i = 0; i < cols; i++){
+        uint16_t sizeOfColVec = (uint16_t)data[currIndexData];
+        currIndexData++;
+        std::vector<uint16_t> toBePushed;
+        uint16_t maxColPush = 0, sumColPush = 0;
+        for(uint16_t j = 0; j < sizeOfColVec; j++){
+            toBePushed.push_back((uint16_t)data[currIndexData]);
+            sumColPush += (uint16_t)data[currIndexData];
+            if( (uint16_t)data[currIndexData] > maxColPush){
+                maxColPush = (uint16_t)data[currIndexData];
+            }
+            currIndexData++;
+        }
+        maxesCols.push_back(maxColPush);
+        sumsCols.push_back(sumColPush);
+        columnVectors.push_back(toBePushed);
+    }
+
+    for(uint16_t i = 0; i < rows; i++){
+        uint16_t sizeOfRowVec = (uint16_t)data[currIndexData];
+        currIndexData++;
+        std::vector<uint16_t> toBePushed;
+        uint16_t maxRowPush =0, sumRowPush =0;
+        for(uint16_t j = 0; j < sizeOfRowVec; j++){
+            toBePushed.push_back((uint16_t)data[currIndexData]);
+            sumRowPush += (uint16_t)data[currIndexData];
+            if( (uint16_t)data[currIndexData] > maxRowPush){
+                maxRowPush = (uint16_t)data[currIndexData];
+            }
+            currIndexData++;
+        }
+        nonoInputMax.push_back(maxRowPush);
+        nonoInputSum.push_back(sumRowPush);
+        nonoInput.push_back(toBePushed);
+    }
+
+    nonoInput.insert(nonoInput.end(), columnVectors.begin(), columnVectors.end());
+    nonoInputMax.insert(nonoInputMax.end(), maxesCols.begin(), maxesCols.end());
+    nonoInputSum.insert(nonoInputSum.end(), sumsCols.begin(), sumsCols.end());
+
+    //
+    /// Create String Concept for its display
+    //
+
+    //this could be excluded from a "pure" only solver no UI but the time it
+    //takes to create the nonogram and its structures is not part of the benchmark itself (actually solving the nonogram)
+
+    for(uint16_t i = 0; i < rows; i++){
+        std::ostringstream ossInts;
+        
+        for (size_t j = 0; j< nonoInput[i].size(); j++){
+            if(j != 0){
+                ossInts << ' ';
+            }
+            ossInts << nonoInput[i][j];
+        }
+        if(maxHor < ossInts.str().size()) maxHor = ossInts.str().size();
+        nonoInputString.push_back(ossInts.str());
+    }
+
+    for(uint16_t i = 0; i < cols; i++){
+        std::ostringstream ossInts;
+        
+        for (size_t j = 0; j< nonoInput[(rows +i)].size(); j++){
+            if(j != 0){
+                ossInts << '\n';
+            }
+            ossInts << nonoInput[(rows +i)][j];
+        }
+        if(maxVer < nonoInput[(rows +i)].size()) maxVer = nonoInput[(rows +i)].size();
+        nonoInputString.push_back(ossInts.str());
+    }
+}
+
 /// @brief Destructor for nonogram object
 nonogram::~nonogram()
 {
@@ -886,6 +974,7 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
     if( spaceAvailable == 0) { //This case should have been handled by logic and as such this row is already handled
 
         //this->printDFS();
+        this->print(&nonoWorkingDFS, true);
 
         DFS(index + 1, solutionFound);
     
@@ -893,10 +982,12 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
             return;
         }else if (index + 1 < rows){ //clear all below if solution not found
             //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
-            for(uint16_t i = index+1; i < cols; i++){
+            for(uint16_t i = index; i < rows; i++){
                 nonoWorkingDFS[i] = nonoWorking[i];
             }
         }
+
+        this->print(&nonoWorkingDFS, true);
     }
     if(whiteRuns == 0){
         //run all possibilities of this specific case;
@@ -904,16 +995,19 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
             if(isPermutationPossible(nonoInput[index][0], i, index)){
 
                 //this->printDFS();
+                this->print(&nonoWorkingDFS, true);
                 DFS(index+ 1, solutionFound);
 
                 if(*solutionFound){
                     return;
                 }else if (index + 1 < rows){ //clear all below if solution not found
                     //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
-                    for(uint16_t i = index+1; i < cols; i++){
+                    for(uint16_t i = index; i < rows; i++){
                         nonoWorkingDFS[i] = nonoWorking[i];
                     }
                 }
+
+                this->print(&nonoWorkingDFS, true);
 
             }
         }
@@ -928,16 +1022,19 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
                 if(isPermutationPossible(&rowSpace, i, index)){
                     //this->printDFS();
 
+                    this->print(&nonoWorkingDFS, true);
                     DFS(index + 1, solutionFound);
 
                     if(*solutionFound){
                         return;
                     }else if (index + 1 < rows){//clear all below if solution not found
                         //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
-                        for(uint16_t i = index+1; i < cols; i++){
+                        for(uint16_t i = index; i < rows; i++){
                             nonoWorkingDFS[i] = nonoWorking[i];
                         }
                     }
+
+                    this->print(&nonoWorkingDFS, true);
 
                 }
             }
@@ -968,7 +1065,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftm
 
     std::vector<bool> rowPermutationBuilt(2*cols);
     //clear current index to hold only the solid logic truth
-    nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
+    //nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
 
     uint16_t currIndexBuilding{};
     for(uint16_t i = 0; i< leftmostSpace; i++){
@@ -1055,7 +1152,7 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftm
     
 
     if(!this->isAllColsPossible(&nonoWorkingDFS)){
-        for(uint16_t i = rowIndex; i < cols; i++){
+        for(uint16_t i = rowIndex; i < rows; i++){
             nonoWorkingDFS[i] = nonoWorking[i];
         }
         return false;
@@ -1119,7 +1216,9 @@ bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, 
     //
 
     if(!this->isAllColsPossible(&nonoWorkingDFS)){
-        nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
+        for(uint16_t i = rowIndex; i < rows; i++){
+            nonoWorkingDFS[i] = nonoWorking[i];
+        }
         return false;
     };
 
@@ -1132,7 +1231,7 @@ bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, 
 bool nonogram::solveDFS(){
 
     //if benchmarking, consider commenting out the next line.
-    this->solveLogicMethod(&nonoWorking);
+    //this->solveLogicMethod(&nonoWorking);
     nonoWorkingDFS = nonoWorking;
     bool solutionFound(false);
     try
