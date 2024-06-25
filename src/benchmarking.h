@@ -243,7 +243,7 @@ void getStandardDeviationDuration(uintmax_t iterationsPerSize, uint16_t size = 1
     
 }
 
-//Comment all below if it produces any problems, as I can't distribute the dataSetNonograms file
+//Comment or delete all below if it produces any problems, as I can't distribute the dataSetNonograms file
 #include "dataSetNonograms.h"
 void runWebpnDataset(){
     nonogram* webpnHere;

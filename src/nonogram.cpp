@@ -980,7 +980,7 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
     
         if(*solutionFound){
             return;
-        }else if (index + 1 < rows){ //clear all below if solution not found
+        }else { //clear all below if solution not found
             //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
             for(uint16_t i = index; i < rows; i++){
                 nonoWorkingDFS[i] = nonoWorking[i];
@@ -1000,7 +1000,7 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
 
                 if(*solutionFound){
                     return;
-                }else if (index + 1 < rows){ //clear all below if solution not found
+                }else { //clear all below if solution not found
                     //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
                     for(uint16_t i = index; i < rows; i++){
                         nonoWorkingDFS[i] = nonoWorking[i];
@@ -1027,7 +1027,7 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
 
                     if(*solutionFound){
                         return;
-                    }else if (index + 1 < rows){//clear all below if solution not found
+                    }else {//clear all below if solution not found
                         //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
                         for(uint16_t i = index; i < rows; i++){
                             nonoWorkingDFS[i] = nonoWorking[i];
@@ -1180,7 +1180,7 @@ bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, 
 
     std::vector<bool> rowPermutationBuilt(2*cols);
     //clear current index to hold only the solid logic truth
-    nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
+    ////nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
     uint16_t currIndexBuilding{};
     for(uint16_t i = 0; i< leftmostSpace; i++){
         if(nonoWorkingDFS[rowIndex][(2*currIndexBuilding)]){ 
