@@ -54,10 +54,11 @@ public: // small performance boost by struct-like behaviour of all public class.
     bool isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
     bool isColsSolutionDFS();
 
-    void DFS(uint16_t index, bool *solutionFound);
-    bool solveDFS();
-    void copyRowsBelow(uint16_t index, std::vector<std::vector<bool>> *copyTo, std::vector<std::vector<bool>> *copyFrom);
 
+    void DFS(uintmax_t index, bool *solutionFound,  GLFWwindow* window);
+    bool solveDFS(GLFWwindow* window);
+    
+    void inbetweenDrawWorkingMatrix(GLFWwindow* window);
 };
 
 /// @brief Contradiction that can arise when solving nonogram

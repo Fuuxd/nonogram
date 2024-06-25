@@ -1,5 +1,129 @@
 #include "nonogram.h"
 
+#include "config.h"
+
+//functions to handle drawing, makes solving process more inefficient but way more visualizable for user
+void drawWorkingNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, std::vector<std::vector<bool>> *matrix, float horOffset, float verOffset, float horWidth, float verWidth){
+    for(uintmax_t i=0; i < RandoNono->rows; i++){
+        for(uintmax_t j =0; j < RandoNono->cols; j++){
+            
+            if((*matrix)[i][2*j]) { 
+                drawList->AddRectFilled(
+                    ImVec2( // p_min so bottom left (x1, y1) 
+                        horOffset + ((j) * horWidth), 
+                        verOffset + ( (i) * verWidth)
+                        ), 
+                    ImVec2( // p_max so top right (x2, y2)
+                        horOffset + ( (j+1) * horWidth), 
+                        verOffset + ( (i+1) * verWidth)
+                        ), 
+                    IM_COL32(65, 227, 231, 255)
+                ); 
+            } 
+            if((*matrix)[i][(2*j) + 1]) { 
+                drawList->AddRectFilled(
+                    ImVec2( // p_min so bottom left (x1, y1) 
+                        horOffset + ((j) * horWidth), 
+                        verOffset + ( (i) * verWidth)
+                        ), 
+                    ImVec2( // p_max so top right (x2, y2)
+                        horOffset + ( (j+1) * horWidth), 
+                        verOffset + ( (i+1) * verWidth)
+                        ), 
+                    IM_COL32(252, 1, 233, 100)
+                ); 
+            }
+        }
+    }
+}
+
+void drawSolutionNonogramMatrix(ImDrawList* drawList, nonogram* RandoNono, float horOffset, float verOffset, float horWidth, float verWidth){
+    for(uintmax_t i=0; i < RandoNono->rows; i++){
+        for(uintmax_t j =0; j < RandoNono->cols; j++){
+            
+            if(RandoNono->nonoSolved[i][j]) { 
+                drawList->AddRectFilled(
+                    ImVec2( // p_min so bottom left (x1, y1) 
+                        horOffset + ((j) * horWidth), 
+                        verOffset + ( (i) * verWidth)
+                        ), 
+                    ImVec2( // p_max so top right (x2, y2)
+                        horOffset + ( (j+1) * horWidth), 
+                        verOffset + ( (i+1) * verWidth)
+                        ), 
+                    IM_COL32(65, 227, 231, 255)
+                ); 
+            } 
+
+        }
+    }
+}
+
+void nonogram::inbetweenDrawWorkingMatrix(GLFWwindow* window){
+    glfwPollEvents();
+
+    // Start the ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    
+    int w, h;
+    glfwGetFramebufferSize(window, &w, &h);
+    glViewport(0, 0, w, h);
+
+    ImDrawList* drawListInbetween = ImGui::GetBackgroundDrawList();
+
+    //
+    /// Text for numbers
+    //
+    
+    float horWidth, OneNHalfHorWidth, verWidth, OneNhalfVerWidth ;
+
+    ImVec2 textSize = ImGui::CalcTextSize("1");
+
+    float verOffsetTxt = ( (this->maxVer) * textSize.y); //this is the vertical offset caused when writing the row text input for nono
+    float horOffsetTxt = ( (this->maxHor) * textSize.x); //this is the horizontal offset caused when writing the cols text input for nono
+
+    horWidth = ((w - ( (w/40) + horOffsetTxt + 15.0f))/(cols));
+    OneNHalfHorWidth = horWidth/2 + horOffsetTxt + textSize.x/2 + 5.0f;
+    verWidth = ((h - ( (h/40) + verOffsetTxt + 15.0f))/(rows));
+    OneNhalfVerWidth = verWidth/2 + verOffsetTxt + textSize.y/2;
+
+
+
+    for(uintmax_t i =0; i< rows; i++ ){
+        drawListInbetween->AddText(NULL, 13.0f, 
+
+        ImVec2(10.0f, OneNhalfVerWidth  + (verWidth * i)),
+
+        IM_COL32(200, 200, 200, 235), &((this->nonoInputString[i])[0]));
+    }
+    for(uintmax_t i =0; i< cols; i++ ){
+        drawListInbetween->AddText(NULL, 13.0f, 
+
+        ImVec2(OneNHalfHorWidth + (horWidth * i), 10.0f), 
+
+        IM_COL32(200, 200, 200, 235), &((this->nonoInputString[(this->rows + i)])[0]));
+    }
+
+    verOffsetTxt += 15.0f;
+    horOffsetTxt += 15.0f;
+
+    // draw NonogramMatrix
+    drawWorkingNonogramMatrix (drawListInbetween, this, &nonoWorkingDFS, horOffsetTxt, verOffsetTxt, horWidth, verWidth);
+
+    // Rendering
+    ImGui::Render();
+    glfwGetFramebufferSize(window, &w, &h);
+    glViewport(0, 0, w, h);
+    glClearColor(0.025f, 0.025f, 0.025f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(window);
+}
+
 /// @brief Create a random nonogram with a set # of rows and cols
 /// @param rowsIn Number of Rows. must be an unsigned integer <= 65,535
 /// @param colsIn Number of Columns. must be an unsigned integer <= 65,535
@@ -959,7 +1083,8 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
 /// @brief A depth first search/Inorder traversal of all possibilities. 
 ///Before calling this method make sure to call nonoWorkingDFS = nonoWorking and optionally solveFuuxMethod();
 /// @param index Current row being checked, should be set to 0 unless called from inside the function recursively.
-void nonogram::DFS(uint16_t index, bool *solutionFound){
+
+void nonogram::DFS(uint16_t index, bool *solutionFound, GLFWwindow* window){
 
     if(index >= rows){ //boolean 
         if( this->isColsSolutionDFS()){
@@ -968,15 +1093,17 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
         return;
     }
 
-    //TODO: change printDFS to drawNonoMatrix and link with main
+
+
     uint16_t spaceAvailable = cols - nonoInputSum[index]; //space available (permitted number of blank space) for this given input
     uint16_t whiteRuns = nonoInput[index].size() - 1; // the amount of white runs inbetween black runs for this input
+
     if( spaceAvailable == 0) { //This case should have been handled by logic and as such this row is already handled
+        
+        inbetweenDrawWorkingMatrix(window);
 
-        //this->printDFS();
-        this->print(&nonoWorkingDFS, true);
 
-        DFS(index + 1, solutionFound);
+        DFS(index + 1, solutionFound, window);
     
         if(*solutionFound){
             return;
@@ -994,9 +1121,9 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
         for(uint16_t i = 0; i <= spaceAvailable; i++){ //careful with the <=, check isPermutationPossible if confusing.
             if(isPermutationPossible(nonoInput[index][0], i, index)){
 
-                //this->printDFS();
-                this->print(&nonoWorkingDFS, true);
-                DFS(index+ 1, solutionFound);
+                inbetweenDrawWorkingMatrix(window);
+                
+                DFS(index+ 1, solutionFound, window);
 
                 if(*solutionFound){
                     return;
@@ -1020,10 +1147,10 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
             uint16_t maxLeftmostSpace = (cols - nonoInputSum[index]) - rowSpace.getSum(); //can't reuse spaceAvailable (whiteRuns case above)
             for(uint16_t i = 0; i <= maxLeftmostSpace; i++){  //careful with the <=, check isPermutationPossible if confusing.
                 if(isPermutationPossible(&rowSpace, i, index)){
-                    //this->printDFS();
 
-                    this->print(&nonoWorkingDFS, true);
-                    DFS(index + 1, solutionFound);
+                    inbetweenDrawWorkingMatrix(window);
+
+                    DFS(index + 1, solutionFound, window);
 
                     if(*solutionFound){
                         return;
@@ -1228,15 +1355,16 @@ bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, 
 
 /// @brief A depth first search/Inorder traversal of all possibilities. wraps DFS() method. 
 /// @return whether a solution was found or not. If error occurs, its assumed that a solution was not found and there is some sort of problem with the input.
-bool nonogram::solveDFS(){
+bool nonogram::solveDFS(GLFWwindow* window){
 
     //if benchmarking, consider commenting out the next line.
     //this->solveLogicMethod(&nonoWorking);
+
     nonoWorkingDFS = nonoWorking;
     bool solutionFound(false);
     try
     {
-        this->DFS(0, &solutionFound);
+        this->DFS(0, &solutionFound, window);
     }
     catch(const std::exception& e)
     {
