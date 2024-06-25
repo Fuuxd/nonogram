@@ -56,7 +56,6 @@ public: // small performance boost by struct-like behaviour of all public class.
 
     void DFS(uint16_t index, bool *solutionFound);
     bool solveDFS();
-    void copyRowsBelow(uint16_t index, std::vector<std::vector<bool>> *copyTo, std::vector<std::vector<bool>> *copyFrom);
 
 };
 
