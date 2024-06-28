@@ -501,9 +501,18 @@ bool nonogram::isAllColsPossible(std::vector<std::vector<bool>> *matrix){
 
 /// @brief checks if all cols are complete, thus being a col solution. calls isColComplete for all Columns.
 /// @return False if any column is not complete, true otherwise.
-bool nonogram::isColsSolutionDFS(){
+bool nonogram::isColsSolutionDFS( std::vector<std::vector<bool>> *rowVectors ){
+    if(rowVectors->size() != rows){
+        std::cerr << "Checking ColsSolutionDFS with invalid rowVector Size";
+        return false;
+    }
+    for(uint16_t i = 0; i < (rowVectors->size() - 1); i++){
+        nonoWorkingDFS[i] = (*rowVectors)[i];
+    }
+
     for(uint16_t i =0; i < cols; i++){
         if(!this->isColComplete(&nonoWorkingDFS, i)){
+            //clearing the matrix not needed as isPermutationPossible() handles it
             return false;
         }
     }
@@ -959,10 +968,10 @@ void nonogram::logicColBotToTop(int i, int j, int k, int columnsHere, bool* edge
 /// @brief A depth first search/Inorder traversal of all possibilities. 
 ///Before calling this method make sure to call nonoWorkingDFS = nonoWorking and optionally solveFuuxMethod();
 /// @param index Current row being checked, should be set to 0 unless called from inside the function recursively.
-void nonogram::DFS(uint16_t index, bool *solutionFound){
+void nonogram::DFS(std::vector<std::vector<bool>> *rowVectors, uint16_t index, bool *solutionFound){
 
     if(index >= rows){ //boolean 
-        if( this->isColsSolutionDFS()){
+        if( this->isColsSolutionDFS(rowVectors) ) {
             *solutionFound = true;
         }
         return;
@@ -974,44 +983,47 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
     if( spaceAvailable == 0) { //This case should have been handled by logic and as such this row is already handled
 
         //this->printDFS();
-        this->print(&nonoWorkingDFS, true);
+        //this->print(&nonoWorkingDFS, true);
 
-        DFS(index + 1, solutionFound);
+        std::vector<bool> rowToPush;
+        for(uint16_t i = 0; i < cols; i++){
+            rowToPush.push_back(true);
+            rowToPush.push_back(false);
+        }
+
+        rowVectors->push_back(rowToPush);
+
+        DFS(rowVectors, index + 1, solutionFound);
     
         if(*solutionFound){
             return;
         }else { //clear all below if solution not found
-            //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
-            for(uint16_t i = index; i < rows; i++){
-                nonoWorkingDFS[i] = nonoWorking[i];
-            }
+            rowVectors->pop_back();
         }
 
-        this->print(&nonoWorkingDFS, true);
+        //this->print(&nonoWorkingDFS, true);
     }
     if(whiteRuns == 0){
         //run all possibilities of this specific case;
         for(uint16_t i = 0; i <= spaceAvailable; i++){ //careful with the <=, check isPermutationPossible if confusing.
-            if(isPermutationPossible(nonoInput[index][0], i, index)){
+            if(isPermutationPossible(rowVectors, nonoInput[index][0], i, index)){
 
                 //this->printDFS();
-                this->print(&nonoWorkingDFS, true);
-                DFS(index+ 1, solutionFound);
+                //this->print(&nonoWorkingDFS, true);
+                DFS(rowVectors, index+ 1, solutionFound);
 
                 if(*solutionFound){
                     return;
                 }else { //clear all below if solution not found
-                    //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
-                    for(uint16_t i = index; i < rows; i++){
-                        nonoWorkingDFS[i] = nonoWorking[i];
-                    }
+                    rowVectors->pop_back();
                 }
-
-                this->print(&nonoWorkingDFS, true);
-
             }
+
+            //this->print(&nonoWorkingDFS, true);
+
         }
-    }else{
+    }
+    else{
         if(whiteRuns == 1){ // TODO: SO CHECK HERE basically I think trouble here, maybe go back to main and comment out solvefuux method to try compute
             spaceAvailable++;
         }
@@ -1019,22 +1031,19 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
         for(permutationVector rowSpace(spaceAvailable, whiteRuns); !rowSpace.allPermutationsIterated; rowSpace++){
             uint16_t maxLeftmostSpace = (cols - nonoInputSum[index]) - rowSpace.getSum(); //can't reuse spaceAvailable (whiteRuns case above)
             for(uint16_t i = 0; i <= maxLeftmostSpace; i++){  //careful with the <=, check isPermutationPossible if confusing.
-                if(isPermutationPossible(&rowSpace, i, index)){
+                if(isPermutationPossible(rowVectors, &rowSpace, i, index)){
                     //this->printDFS();
 
-                    this->print(&nonoWorkingDFS, true);
-                    DFS(index + 1, solutionFound);
+                    //this->print(&nonoWorkingDFS, true);
+                    DFS(rowVectors, index + 1, solutionFound);
 
                     if(*solutionFound){
                         return;
                     }else {//clear all below if solution not found
-                        //nonoWorkingDFS[index + 1] = nonoWorking[index + 1];
-                        for(uint16_t i = index; i < rows; i++){
-                            nonoWorkingDFS[i] = nonoWorking[i];
-                        }
+                        rowVectors->pop_back();
                     }
 
-                    this->print(&nonoWorkingDFS, true);
+                    //this->print(&nonoWorkingDFS, true);
 
                 }
             }
@@ -1051,21 +1060,27 @@ void nonogram::DFS(uint16_t index, bool *solutionFound){
 /// @param leftmostSpace white space to the left of first black run
 /// @param rowIndex current row being checked
 /// @return True if permutationVector is possible for given row, False otherwise. 
-bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex){
+bool nonogram::isPermutationPossible(std::vector<std::vector<bool>> *rowVectors, permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex){
     //DEBUG STATEMENTS
     //std::cout << "checking row:" << rowIndex << " leftmostSpace:" << leftmostSpace << " permVec:";
     //rowSpace->print();
     //std::cout << std::endl;
 
+    for(uint16_t i = 0; i < rowVectors->size(); i++){
+        nonoWorkingDFS[i] = (*rowVectors)[i];
+    }
+    for(uint16_t i = rowVectors->size(); i < rows; i++){
+        nonoWorkingDFS[i] = nonoWorking[i];
+    }
+
     // 
-    /// CHECK IF rowSpace permutation works for current graph 
+    /// CHECK IF rowSpace permutation works for current context 
     //
 
     //check if ROW works
 
     std::vector<bool> rowPermutationBuilt(2*cols);
     //clear current index to hold only the solid logic truth
-    //nonoWorkingDFS[rowIndex] = nonoWorking[rowIndex];
 
     uint16_t currIndexBuilding{};
     for(uint16_t i = 0; i< leftmostSpace; i++){
@@ -1142,23 +1157,16 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftm
     }
     catch(const std::exception& e)// if literally anthing wrong just clear below and return false
     {
-        //std::cerr << e.what() << '\n';
-        for(uint16_t i = rowIndex; i < cols; i++){
-            nonoWorkingDFS[i] = nonoWorking[i];
-        }
         return false;
     }
     
     
 
     if(!this->isAllColsPossible(&nonoWorkingDFS)){
-        for(uint16_t i = rowIndex; i < rows; i++){
-            nonoWorkingDFS[i] = nonoWorking[i];
-        }
         return false;
     };
 
-
+    rowVectors->push_back(rowPermutationBuilt);
     return true;
 }
 
@@ -1167,13 +1175,20 @@ bool nonogram::isPermutationPossible(permutationVector* rowSpace, uint16_t leftm
 /// @param leftmostSpace white space to the left of first black run
 /// @param rowIndex current row being checked
 /// @return True if permutationVector is possible for given row, False otherwise. 
-bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex){
+bool nonogram::isPermutationPossible(std::vector<std::vector<bool>> *rowVectors, uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex){
     //DEBUG STATEMENTS
     //std::cout << "checking row:" << rowIndex << " leftmostSpace:" << leftmostSpace << " ";
     //std::cout << blackRun << std::endl;
 
+    for(uint16_t i = 0; i < rowVectors->size(); i++){
+        nonoWorkingDFS[i] = (*rowVectors)[i];
+    }
+    for(uint16_t i = rowVectors->size(); i < rows; i++){
+        nonoWorkingDFS[i] = nonoWorking[i];
+    }
+
     //
-    /// CHECK IF blackRun works for current graph 
+    /// CHECK IF blackRun works for current context
     //
 
     //check if ROW works
@@ -1215,14 +1230,22 @@ bool nonogram::isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, 
     ///check if COLS works 
     //
 
+    try
+    {
+        this->solveLogicMethod(&nonoWorkingDFS);
+    }
+    catch(const std::exception& e)// if literally anthing wrong just clear below and return false
+    {
+        return false;
+    }
+    
+    
+
     if(!this->isAllColsPossible(&nonoWorkingDFS)){
-        for(uint16_t i = rowIndex; i < rows; i++){
-            nonoWorkingDFS[i] = nonoWorking[i];
-        }
         return false;
     };
 
-
+    rowVectors->push_back(rowPermutationBuilt);
     return true;
 }
 
@@ -1234,9 +1257,10 @@ bool nonogram::solveDFS(){
     //this->solveLogicMethod(&nonoWorking);
     nonoWorkingDFS = nonoWorking;
     bool solutionFound(false);
+    std::vector<std::vector<bool>> rowVectors;
     try
     {
-        this->DFS(0, &solutionFound);
+        this->DFS(&rowVectors, 0, &solutionFound);
     }
     catch(const std::exception& e)
     {

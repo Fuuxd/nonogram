@@ -14,7 +14,7 @@ int main(){
     //getStandardDeviationDuration(200); //This takes around two hours.
     //runCoveragePercentage(52); //This takes around half an hour
     //std::cout << std::endl;
-    //runDFSBenchmark(100); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
+    //runDFSBenchmark(5); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
     //runWebpnDataset();
     
     //default values

@@ -50,11 +50,11 @@ public: // small performance boost by struct-like behaviour of all public class.
     void logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot, std::vector<std::vector<bool>> *matrix);
 
 
-    bool isPermutationPossible(permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex);
-    bool isPermutationPossible(uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
-    bool isColsSolutionDFS();
+    bool isPermutationPossible(std::vector<std::vector<bool>> *rowVectors, permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex);
+    bool isPermutationPossible(std::vector<std::vector<bool>> *rowVectors, uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
+    bool isColsSolutionDFS(std::vector<std::vector<bool>> *rowVectors);
 
-    void DFS(uint16_t index, bool *solutionFound);
+    void DFS(std::vector<std::vector<bool>> *rowVectors, uint16_t index, bool *solutionFound);
     bool solveDFS();
 
 };
