@@ -31,5 +31,5 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(Nonogram -static glfw OpenGL::GL)
 target_link_libraries(Nonogram -static OpenGL::GL)
 
-
+#O2 Optmization
 target_compile_options(Nonogram PRIVATE -O2)
