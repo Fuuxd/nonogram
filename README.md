@@ -1,11 +1,10 @@
 ### About
 
-This folder holds a Imguibased GUI.
+This folder holds a Imguibased GUI. The GUI is primarily a debugging feature and is not the focus of this branch. However, the branch "GUIMerge" focuses more on visualizing the complete solving process, if you are interested.
 
 changing from openGL to directx would take away the option to move to linux in the future and this is more compatible both ways, so while UI and user convenience do not become a priority it will stay in this format
 
 For details about the actual nonogram solving refer to nonogram.cpp / nonogram.md
-
 
 ## Usage
 I try to statically link and embed everything so that only using the .exe [Nonogram.exe](./Nonogram.exe) will suffice for most windows users.
@@ -13,21 +12,20 @@ I try to statically link and embed everything so that only using the .exe [Nonog
 If you are a user interested solely on the visualization of the solving process, I recommend using the GUIMerge branch instead of main.
 
 However, obtaining a trusted signature to bypass the Windows defender unrecognized app screen is costly to my knowledge,
-so you can build it yourself:
 
-The process itself should consist of traversing to the root directory (cd Path), and afterwards:
+Therefore, you are welcome to build it yourself: 
 
-rmdir /S /Q build
+download and Install cmake, afterwards
 
-mkdir build
+    git clone https://github.com/Fuuxd/nonogram.git --recurse-submodules
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build .      
 
-cd build
+Alternatively, install cmake extensions for vscode and do the equivalent
 
-cmake ..
-
-cmake --build .      
-
-Alternatively, install cmake extensions for vscode and do >cmake clean rebuild
+If you see errors related to dataSetNonograms.h, or Webpn. Delete all related lines, and try building again.
 
 ### Benchmarking
 Uncomment the first lines in main.cpp in the main function, and rebuild, then:

@@ -38,9 +38,7 @@ I ensure the nonogram is solvable, by first producing a complete nonogram and th
 The first and second problem could have overlap in its solving methods, and a fully accurate solution to the second problem could potentially solve the first problem if it simply does not find a solution. However, the third problem is completely out of the scope of this project.
 
 ## Motivation:
-so brute forcing this would take 
->O(2^(n*m)^)
-very unefficient.
+so brute forcing a n x m matrix would take O(2^(n*m)^), which is very unefficient.
 
 the goal is to optimize the solving sufficiently so that it takes a reasonable amount of time to solve a 1000x1000 puzzle and to see the solving process.
 
