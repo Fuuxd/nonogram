@@ -14,12 +14,12 @@ int main(){
     //getStandardDeviationDuration(200); //This takes around two hours.
     //runCoveragePercentage(52); //This takes around half an hour
     //std::cout << std::endl;
-    //runDFSBenchmark(5); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
+    //runDFSBenchmark(52); //NP Complete problem, exponential time complexity. will outlast earth's lifespan
     //runWebpnDataset();
     
     //default values
-    int* rowsIn = new int(5);
-    int* colsIn = new int(5);
+    int rowsIn (5);
+    int colsIn (5);
 
     //CREATE RANDOM NONOGRAM
     //nonogram* RandoNono = new nonogram(*rowsIn, *colsIn);
@@ -64,8 +64,8 @@ int main(){
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
-    bool* renderText = new bool(1);
-    bool* seeSolution = new bool(0);
+    bool renderText = true;
+    bool seeSolution = false;
 
 
     //
@@ -101,11 +101,11 @@ int main(){
   
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
-        if(*renderText){
+        if(renderText){
 
-        horWidth = ((w - ( (w/40) + horOffsetTxt + 15.0f))/(*colsIn));
+        horWidth = ((w - ( (w/40) + horOffsetTxt + 15.0f))/(colsIn));
         OneNHalfHorWidth = horWidth/2 + horOffsetTxt + textSize.x/2 + 5.0f;
-        verWidth = ((h - ( (h/40) + verOffsetTxt + 15.0f))/(*rowsIn));
+        verWidth = ((h - ( (h/40) + verOffsetTxt + 15.0f))/(rowsIn));
         OneNhalfVerWidth = verWidth/2 + verOffsetTxt + textSize.y/2;
 
             for(uint16_t i =0; i< RandoNono->rows; i++ ){
@@ -131,11 +131,11 @@ int main(){
         //
 
 
-        if(!*renderText){
-            horWidth = (w/(*colsIn + 2));
-            verWidth = (h/(*rowsIn + 2));
+        if(!renderText){
+            horWidth = (w/(colsIn + 2));
+            verWidth = (h/(rowsIn + 2));
 
-            if(!*seeSolution){
+            if(!seeSolution){
                 drawWorkingNonogramMatrix(drawList, RandoNono, &RandoNono->nonoWorking, horWidth, verWidth, horWidth, verWidth);
             }else{
                 drawSolutionNonogramMatrix(drawList, RandoNono, horWidth, verWidth, horWidth, verWidth);
@@ -144,7 +144,7 @@ int main(){
             verOffsetTxt += 15.0f;
             horOffsetTxt += 15.0f;
 
-            if(!*seeSolution){
+            if(!seeSolution){
 
                 drawWorkingNonogramMatrix(drawList, RandoNono, &RandoNono->nonoWorking, horOffsetTxt, verOffsetTxt, horWidth, verWidth);
             } else{
@@ -157,16 +157,16 @@ int main(){
 
         ImGui::Begin("Reform Matrix");
         ImGui::SetNextItemWidth(100.0f);
-        ImGui::InputInt("Number of Rows", rowsIn, 5);
+        ImGui::InputInt("Number of Rows", &rowsIn, 5);
         ImGui::SetNextItemWidth(100.0f);
-        ImGui::InputInt("Number of Cols", colsIn, 5);
+        ImGui::InputInt("Number of Cols", &colsIn, 5);
 
 
         
         if (ImGui::Button("Recreate")){
-            if(*rowsIn > 0 && *colsIn >0){
+            if(rowsIn > 0 && colsIn >0){
                 delete RandoNono;
-                RandoNono = new nonogram(*rowsIn, *colsIn);
+                RandoNono = new nonogram(rowsIn, colsIn);
             }
         }
 
@@ -178,8 +178,8 @@ int main(){
             RandoNono->solveDFS();
         }
 
-        ImGui::Checkbox("Show Solution", seeSolution);
-        ImGui::Checkbox("Show Numbers", renderText);
+        ImGui::Checkbox("Show Solution", &seeSolution);
+        ImGui::Checkbox("Show Numbers", &renderText);
         
 
         ImGui::End();

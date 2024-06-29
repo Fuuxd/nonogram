@@ -179,30 +179,34 @@ pseudocode:
         else
             return false
 
-### Integrating Logic inbetween
+### Inbetween logic and Contexts
+The current rows and their contexts are now passed as parameters too. 
 
 pseudocode:
 
-    DFS(rowvectors, uint rowIndex, bool solutionFound)
+    DFS(rowContexts, rowvectors, uint rowIndex, bool solutionFound)
     if ( rowIndex >= (# of rows) )
         if(isSolution())
             solutionFound = true
         return;
     for each row possibility of rowIndex
-        if( isPermutationPossible(rowvectors, rowIndex) )
+        if( isPermutationPossible(rowContexts, rowvectors, rowIndex) )
             DFS(rowvectors, (rowIndex + 1), solutionFound)
             if(solutionFound)
                 return;
             else
-                rowvectors.pop_back() - remove last vector added to
+                if size(rowContexts) > 0
+                    rowContexts.pop_back() - remove last vector added
+                rowvectors.pop_back() - remove last vector added
 
-
-    isPermutationPossible( rowVectors, permutationVector rowPermutation, uint rowIndex )
-        for integer i from 0 to size(rowVectors)-1
+    isPermutationPossible(rowContexts, rowVectors, permutationVector rowPermutation, uint rowIndex )
+        for integer i from 0 to rowIndex - 1
             DFSWorkingMatrix [i] = rowVectors[i]
-        from integer i from size(rowVectors) to # of rows
+        if size(rowContexts) > 0
+            DFSWorkingMatrix[rowIndex] = last element of rowContexts
+        for the rest of the rows
             DFSWorkingMatrix [i] = nonoWorkingMatrix[i] 
-        if rowPermutation does not fit in DFSWorkingMatrix [rowIndex]
+        if rowPermutation does not fit in rowContexts[rowIndex]
             return false
         DFSWorkingMatrix[rowIndex] = rowPermutation
         if all columns are not possible:
@@ -214,9 +218,41 @@ pseudocode:
         if all columns are not possible:
             return false
         append rowPermutation to rowVectors
+        if(rowIndex + 1 < rows)
+            append DFSWorkingMatrix[rowIndex+1] to rowContexts
         return true
+
+### Data structures
+rowVectors and rowContexts are implemented as a vector of vectors (forming a matrix) but future optimizations could use a lighter data structure such as a linked list (of vectors anyway), considering its current use as shown. 
+
+# About nonogram tournaments
+https://content.iospress.com/articles/icga-journal/icg230216
+
+an ambitious goal would be to outperform them. 
+
+# LalaFrogKK
+...An Efficient Approach to Solving Nonograms
+I.-Chen Wu, Member, IEEE, Der-Johng Sun, Lung-Ping Chen, Kan-Yueh Chen, Ching-Hua Kuo,Hao-Hua Kang, and Hung-Hsuan Lin
+
+# Requiem
+https://content.iospress.com/articles/icga-journal/icg190097
+hard paywall I'm guessing. they say theye expand on "Wu", which is LaLaFrogKK above or another unmentioned, "Naughty"
+
+reading all these codenames really does make it sound cool 
 
 ## Considerations:
 Memory was kept limited, for this specific method memory complexity is polynomial.
 another nonogram bool matrix was added, thus making the nonogram object in itself heavier in memory even if only using the Logic-Only methods.
+
+My method was a fun project and a good learning experience, but the truth of the matter is my approaches can only seem to solve up to nonograms size 20x20 - 30x30 depending on how hard the nonogram input is. 
+
+So plan is now to read understand and implement in this solver approaches:
+
+LalaFrogKK winner of nonogram tournaments
+and Requiem, most current winner of nongram tournament found
+
+these are made by asian authors and as such language barriers might be a big problem, but I already expected such things when looking over the research papers and given the asian origins of nonograms themselves
+
+solid data here:
+https://kcwu.csie.org/~kcwu/nonogram/taai11/
 

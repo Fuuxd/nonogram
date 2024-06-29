@@ -50,25 +50,11 @@ public: // small performance boost by struct-like behaviour of all public class.
     void logicColBotToTop(int i, int j, int k, int columnsHere, bool* edgemostInt, bool* edge, int* maxBot, std::vector<std::vector<bool>> *matrix);
 
 
-    bool isPermutationPossible(std::vector<std::vector<bool>> *rowVectors, permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex);
-    bool isPermutationPossible(std::vector<std::vector<bool>> *rowVectors, uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
+    bool isPermutationPossible(std::vector<std::vector<bool>> *rowContexts, std::vector<std::vector<bool>> *rowVectors, permutationVector* rowSpace, uint16_t leftmostSpace, uint16_t rowIndex);
+    bool isPermutationPossible(std::vector<std::vector<bool>> *rowContexts, std::vector<std::vector<bool>> *rowVectors, uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
     bool isColsSolutionDFS(std::vector<std::vector<bool>> *rowVectors);
 
-    void DFS(std::vector<std::vector<bool>> *rowVectors, uint16_t index, bool *solutionFound);
+    void DFS(std::vector<std::vector<bool>> *rowContexts, std::vector<std::vector<bool>> *rowVectors, uint16_t index, bool *solutionFound);
     bool solveDFS();
 
-};
-
-/// @brief Contradiction that can arise when solving nonogram
-/// plan is to use this to optimize DFS a bit further. 
-class nonoContradiction : public std::exception {
-public:
-    nonoContradiction(char* passedMessage) : message(passedMessage) {}
-    
-    const char* what() const throw() {
-        return message;
-    }
-
-private:
-    char* message;
 };
