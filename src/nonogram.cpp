@@ -1417,7 +1417,7 @@ bool nonogram::solveDFS(GLFWwindow* window){
     std::vector<std::vector<bool>> rowContexts;
     try
     {
-        this->DFS(&rowContexts, &rowVectors, 0, &solutionFound);
+        this->DFS(&rowContexts, &rowVectors, 0, &solutionFound, window);
     }
     catch(const std::exception& e)
     {

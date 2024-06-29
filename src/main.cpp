@@ -169,9 +169,9 @@ int main(){
         }
 
         if (ImGui::Button("Pure Logic")){
-            RandoNono->solveLogicMethod();
+            RandoNono->solveLogicMethod(&RandoNono->nonoWorking);
         }
-
+ 
         if (ImGui::Button("DFS")){
             
             ImGui::End();

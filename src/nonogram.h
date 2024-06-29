@@ -54,7 +54,7 @@ public: // small performance boost by struct-like behaviour of all public class.
     bool isPermutationPossible(std::vector<std::vector<bool>> *rowContexts, std::vector<std::vector<bool>> *rowVectors, uint16_t blackRun, uint16_t leftmostSpace, uint16_t rowIndex);
     bool isColsSolutionDFS(std::vector<std::vector<bool>> *rowVectors);
 
-    void DFS(std::vector<std::vector<bool>> *rowContexts, std::vector<std::vector<bool>> *rowVectors, uint16_t index, GLFWwindow* window);
+    void DFS(std::vector<std::vector<bool>> *rowContexts, std::vector<std::vector<bool>> *rowVectors, uint16_t index, bool *solutionFound, GLFWwindow* window);
     bool solveDFS(GLFWwindow* window);
     
     void inbetweenDrawWorkingMatrix(GLFWwindow* window);
