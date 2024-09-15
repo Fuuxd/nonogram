@@ -1,6 +1,8 @@
 ### About
 
-This folder holds a Imguibased GUI. The GUI is primarily a debugging feature and is not the focus of this branch. However, the branch "GUIMerge" focuses more on visualizing the complete solving process, if you are interested.
+A C++ OpenGL DearImGUI application that shows a visualization of a proprietary nonogram solving algorithm. 
+
+The GUI is primarily a debugging feature and is not the focus of this branch. However, the branch "GUIMerge" focuses more on visualizing the complete solving process, if you are interested.
 
 changing from openGL to directx would take away the option to move to linux in the future and this is more compatible both ways, so while UI and user convenience do not become a priority it will stay in this format
 
